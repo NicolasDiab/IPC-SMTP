@@ -101,14 +101,15 @@ public class Utils {
     }
 
     public static void displayMessage(){
-        System.out.println("88888888888888b.  .d8888b.             8888888b.  .d88888b. 8888888b.  .d8888b. ");
-        System.out.println("  888  888   Y88bd88P  Y88b            888   Y88bd88P\" \"Y88b888   Y88bd88P  Y88b");
-        System.out.println("  888  888    888888    888            888    888888     888888    888     .d88P");
-        System.out.println("  888  888   d88P888                   888   d88P888     888888   d88P    8888\" ");
-        System.out.println("  888  8888888P\" 888                   8888888P\" 888     8888888888P\"      \"Y8b.");
-        System.out.println("  888  888       888    888   888888   888       888     888888       888    888");
-        System.out.println("  888  888       Y88b  d88P            888       Y88b. .d88P888       Y88b  d88P");
-        System.out.println("8888888888        \"Y8888P\"             888        \"Y88888P\" 888        \"Y8888P\" ");
+    System.out.println("\n" +
+            " _  _  _  _  _  _  _       _  _  _                                          _  _  _  _    _           _  _  _  _  _  _  _  _  _  _   \n" +
+            "(_)(_)(_)(_)(_)(_)(_)_  _ (_)(_)(_) _                                     _(_)(_)(_)(_)_ (_) _     _ (_)(_)(_)(_)(_)(_)(_)(_)(_)(_)_ \n" +
+            "   (_)   (_)        (_)(_)         (_)                                   (_)          (_)(_)(_)   (_)(_)      (_)      (_)        (_)\n" +
+            "   (_)   (_) _  _  _(_)(_)                       _  _  _  _  _           (_)_  _  _  _   (_) (_)_(_) (_)      (_)      (_) _  _  _(_)\n" +
+            "   (_)   (_)(_)(_)(_)  (_)                      (_)(_)(_)(_)(_)            (_)(_)(_)(_)_ (_)   (_)   (_)      (_)      (_)(_)(_)(_)  \n" +
+            "   (_)   (_)           (_)          _                                     _           (_)(_)         (_)      (_)      (_)           \n" +
+            " _ (_) _ (_)           (_) _  _  _ (_)                                   (_)_  _  _  _(_)(_)         (_)      (_)      (_)           \n" +
+            "(_)(_)(_)(_)              (_)(_)(_)                                        (_)(_)(_)(_)  (_)         (_)      (_)      (_) ");
 
     }
 
@@ -124,6 +125,6 @@ public class Utils {
         headers.add("21 Nov 1997");
         headers.add("1");
         Mail mail = new Mail(headers, "Hello server, \r\nThis is a message just to say hello.\r\nSo, \"Hello\".", nico);
-        Utils.FileManager.storeMail(mail, false);
+        FileManager.storeMail(mail, false);
     }
 }
