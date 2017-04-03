@@ -51,7 +51,7 @@ public class Server {
     private int CODE_501 = 501;
     private int CODE_502 = 502;
 
-    private String MSG_HELLO = this.MSG_OK + " POP3 server ready";
+    private String MSG_HELLO = "SMTP server ready";
 
     /**
      * Properties
