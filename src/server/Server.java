@@ -31,6 +31,7 @@ public class Server {
      * Client's commands constants
      */
     private final String CMD_HELO = "HELO";
+    private final String CMD_EHLO = "EHLO";
     private final String CMD_MAIL = "MAIL";
     private final String CMD_RCPT = "RCPT";
     private final String CMD_RSET = "RSET";
