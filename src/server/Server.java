@@ -99,7 +99,63 @@ public class Server {
             this.state = STATE_AUTHORIZATION;
 
             while (!connexion.isClosed()){
-                // @TODO code server
+                String messageReceived = this.messageUtils.read("\r\n");
+                String command = messageReceived.split("\\s+")[0].toUpperCase();
+                String[] parameters = messageReceived.split("\\s+");
+                String[] parameterArray = Arrays.copyOfRange(parameters, 1, parameters.length);
+                System.out.println("Command " + command);
+
+                switch(command) {
+                    case CMD_EHLO:
+                    case CMD_HELO:
+                        switch(this.state){
+                            //TODO voir les bons codes d'erreurs et les traiter de manière exhaustive
+                            case STATE_AUTHORIZATION:
+                                if (parameterArray.length <= 0)
+                                    this.messageUtils.write(CODE_500 + " Incorrect parameters (lacking server.domain)");
+                                else {
+                                    if (!parameterArray[0].equals(SERVER_DOMAIN))
+                                        this.messageUtils.write(CODE_500 + " Incorrect server.domain");
+                                    else {
+                                        this.messageUtils.write(CODE_250 + " server.domain");
+                                        this.state = STATE_AUTHENTICATED;
+                                    }
+                                }
+                                break;
+                            case STATE_AUTHENTICATED:
+                                this.messageUtils.write(CODE_500 + " Already authenticated");
+                                break;
+                            case STATE_MAIL_RECIPIENTS:
+                                this.messageUtils.write(CODE_500 + " Already authenticated");
+                                break;
+                            case STATE_MAIL_BODY:
+                                this.messageUtils.write(CODE_500 + " Already authenticated");
+                                break;
+                        }
+                        break;
+                    case CMD_MAIL:
+                        break;
+                    case CMD_RCPT:
+                        break;
+                    case CMD_DATA:
+                        break;
+                    case CMD_RSET:
+                        break;
+                    case CMD_QUIT:
+                        switch(this.state){
+                            case STATE_AUTHORIZATION:
+                                //this.messageUtils.write(MSG_OK + " SMTP server signing off");
+                                // close the TCP connection
+                                connexion.close();
+                                // wait for a new client
+                                this.run();
+                                break;
+                        }
+                        break;
+                    default:
+                        this.messageUtils.write(CODE_500 + " invalid command");
+                        break;
+                }
             }
 
         }
