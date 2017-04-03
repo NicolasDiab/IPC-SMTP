@@ -19,6 +19,8 @@ import javax.net.ssl.SSLSocketFactory;
  */
 public class Server {
 
+    private final String SERVER_DOMAIN = "univ-lyon1.fr";
+
     /**
      * State constants
      */
@@ -53,7 +55,7 @@ public class Server {
     private int CODE_501 = 501;
     private int CODE_502 = 502;
 
-    private String MSG_HELLO = "SMTP server ready";
+    private String MSG_HELLO = CODE_220 + " " + SERVER_DOMAIN + " SMTP";
 
     /**
      * Properties
@@ -83,17 +85,26 @@ public class Server {
         this.state = STATE_LISTENING;
 
         try {
-            System.out.println("Attente du client");
+            System.out.println("Waiting for client");
             SSLSocket connexion = null;
             connexion = (SSLSocket) this.myconnex.accept();
 
             this.messageUtils = new Message(connexion);
+
+            // @TODO connect user
+
+            this.messageUtils.write(MSG_HELLO);
+            System.out.println(MSG_HELLO);
+
+            this.state = STATE_AUTHORIZATION;
+
+            while (!connexion.isClosed()){
+                // @TODO code server
+            }
+
         }
         catch(IOException ex){
-            System.err.println(ex);
+            ex.printStackTrace();
         }
-
-
-
     }
 }

@@ -1,3 +1,6 @@
 # IPC-SMTP Client-Serveur
 
-Louis Brazier, Nicolas Diab, Thibault Dubois, Grégoire Piat
+### Louis BRAZIER
+### Nicolas DIAB
+### Thibault DUBOIS
+### Grégoire PIAT

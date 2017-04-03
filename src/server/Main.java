@@ -11,6 +11,7 @@ import javax.rmi.CORBA.Util;
 public class Main {
     public static void main(String [ ] args)
     {
-        Utils.displayMessage();
+        Server server = new Server(2222);
+        server.run();
     }
 }
