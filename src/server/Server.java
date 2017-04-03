@@ -1,5 +1,6 @@
 package server;
 
+import java.io.IOException;
 import java.net.*;
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -59,11 +60,40 @@ public class Server {
      */
     private int port;
     private String state;
-    private String checksumSent;
-    private String timestampSent;
     private ServerSocket myconnex;
 
     // couche qui simplifie la gestion des échanges de message avec le client
     private Message messageUtils;
 
+    public Server (int port){
+        this.port = port;
+
+        try {
+            SSLServerSocket secureSocket = null;
+            SSLServerSocketFactory factory = (SSLServerSocketFactory) SSLServerSocketFactory.getDefault();
+            secureSocket = (SSLServerSocket) factory.createServerSocket(port);
+            secureSocket.setEnabledCipherSuites(factory.getSupportedCipherSuites());
+            myconnex = secureSocket;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void run(){
+        this.state = STATE_LISTENING;
+
+        try {
+            System.out.println("Attente du client");
+            SSLSocket connexion = null;
+            connexion = (SSLSocket) this.myconnex.accept();
+
+            this.messageUtils = new Message(connexion);
+        }
+        catch(IOException ex){
+            System.err.println(ex);
+        }
+
+
+
+    }
 }
