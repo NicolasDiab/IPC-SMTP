@@ -3,6 +3,7 @@ package server;
 import utils.LogManager;
 
 import javax.rmi.CORBA.Util;
+import java.io.IOException;
 
 /**
  * @author NicolasDiab

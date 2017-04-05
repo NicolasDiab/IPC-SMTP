@@ -1,28 +1,36 @@
 package utils;
 
 
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
+import java.io.*;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.util.Date;
 
 public class LogManager {
 
-    private final String LOG_PATH = System.getProperty("user.dir") + "logs.txt";
+    private final String LOG_PATH = System.getProperty("user.dir") + "/" + "logs.txt";
+
 
     public LogManager(String errorName, String error){
         storeLog(errorName, error);
     }
 
+    public LogManager(String errorName){
+        storeLog(errorName, "");
+    }
 
     public void storeLog(String errorName, String error){
 
         try {
-            PrintWriter writer = new PrintWriter(this.LOG_PATH);
-            LocalDateTime now = LocalDateTime.now();
-            writer.append(errorName + " " + error + " " + now.toString());
+            System.out.println(this.LOG_PATH);
+            PrintWriter writer = new PrintWriter(new FileOutputStream(
+                    new File(this.LOG_PATH),
+                    true));
+            DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+            Date date = new Date();
+            writer.append(dateFormat.format(date) + " ---- " + errorName + " -- " + error + "\n");
+            writer.close();
         }
         catch (IOException exc){
             exc.printStackTrace();
