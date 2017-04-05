@@ -78,9 +78,9 @@ public class Utils {
                                 body += newMail.get(i) + "\n";
 
                         /* Create a new message */
-                            Mail mail = new Mail(headers, body, new User("null", "null"));
-                            mails.add(mail);
-                            newMail.clear();
+                            //Mail mail = new Mail(headers, body, new User("null", "null"));
+                            //mails.add(mail);
+                            //newMail.clear();
 
                         }
                     }
@@ -115,16 +115,16 @@ public class Utils {
 
 
     public static void test(){
-        String userDir = System.getProperty("user.dir");
-        System.out.println(userDir);
-        User nico = new User("Strelytsia", "nicotheheros@hotmail.fr");
-        ArrayList<String> headers = new ArrayList<>();
-        headers.add("jdoe@machine.example");
-        headers.add("mary@machine.example");
-        headers.add("Saying Hello");
-        headers.add("21 Nov 1997");
-        headers.add("1");
-        Mail mail = new Mail(headers, "Hello server, \r\nThis is a message just to say hello.\r\nSo, \"Hello\".", nico);
-        FileManager.storeMail(mail, false);
+        //String userDir = System.getProperty("user.dir");
+        //System.out.println(userDir);
+        //User nico = new User("Strelytsia", "nicotheheros@hotmail.fr");
+        //ArrayList<String> headers = new ArrayList<>();
+        //headers.add("jdoe@machine.example");
+        //headers.add("mary@machine.example");
+        //headers.add("Saying Hello");
+        //headers.add("21 Nov 1997");
+        //headers.add("1");
+        //Mail mail = new Mail(headers, "Hello server, \r\nThis is a message just to say hello.\r\nSo, \"Hello\".", nico);
+        //FileManager.storeMail(mail, false);
     }
 }
