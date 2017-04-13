@@ -21,7 +21,7 @@ public class Server implements Runnable{
 
 
     private Thread thread;
-    private final String threadName = "ThreadInstance";
+    private String threadName = "ThreadInstance";
 
     private final String SERVER_DOMAIN = "univ-lyon1.fr";
 
@@ -71,8 +71,10 @@ public class Server implements Runnable{
     // couche qui simplifie la gestion des échanges de message avec le client
     private Message messageUtils;
 
-    public Server (int port){
+    public Server (int port, String threadName){
+
         this.port = port;
+        this.threadName = threadName;
 
         try {
             SSLServerSocket secureSocket = null;
@@ -87,7 +89,7 @@ public class Server implements Runnable{
 
     public void run(){
 
-        System.out.println("TEST");
+        System.out.println("Server started on " + threadName);
         this.state = STATE_LISTENING;
 
         try {
