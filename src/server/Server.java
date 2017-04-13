@@ -17,7 +17,11 @@ import javax.net.ssl.SSLSocketFactory;
  * @author NicolasDiab
  * @author GregoirePiat <gregoire.piat@etu.univ-lyon1.fr>
  */
-public class Server {
+public class Server implements Runnable{
+
+
+    private Thread thread;
+    private final String threadName = "ThreadInstance";
 
     private final String SERVER_DOMAIN = "univ-lyon1.fr";
 
@@ -82,6 +86,8 @@ public class Server {
     }
 
     public void run(){
+
+        System.out.println("TEST");
         this.state = STATE_LISTENING;
 
         try {
@@ -161,6 +167,14 @@ public class Server {
         }
         catch(IOException ex){
             ex.printStackTrace();
+        }
+    }
+
+    public void start () {
+        System.out.println("Starting " +  threadName );
+        if (thread == null) {
+            thread = new Thread (this, threadName);
+            thread.start ();
         }
     }
 }
