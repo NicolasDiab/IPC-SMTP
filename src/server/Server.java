@@ -6,6 +6,8 @@ import java.net.*;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+
 import utils.*;
 
 import javax.net.SocketFactory;
@@ -69,6 +71,7 @@ public class Server implements Runnable{
     private int port;
     private String state;
     private ServerSocket myconnex;
+    private List<String> forwardPaths;
 
     // couche qui simplifie la gestion des échanges de message avec le client
     private Message messageUtils;
@@ -94,6 +97,7 @@ public class Server implements Runnable{
 
         System.out.println("Server started on " + threadName);
         this.state = STATE_LISTENING;
+        forwardPaths = new ArrayList<>();
 
         try {
             System.out.println("Waiting for client");
@@ -166,6 +170,7 @@ public class Server implements Runnable{
                                 }
                                 else{
                                     messageUtils.write("HELLO !");
+                                    state = STATE_MAIL_RECIPIENTS;
                                     /** @TODO go to RCPT TO and mail transaction **/
                                 }
                                 break;
@@ -185,12 +190,40 @@ public class Server implements Runnable{
                             case STATE_AUTHENTICATED:
                                 break;
                             case STATE_MAIL_RECIPIENTS:
+                                messageReceived = this.messageUtils.read("\r\n");
+                                command = messageReceived.split("\\s+")[0].toUpperCase();
+                                parameters = messageReceived.split("\\s+");
+                                parameterArray = Arrays.copyOfRange(parameters, 1, parameters.length);
+                                System.out.println(parameterArray.toString());
+                                if (!parameterArray[0].toUpperCase().equals("TO"))
+                                    break;
+                                if (!userExists(parameterArray[1])){
+                                    messageUtils.write("Unknown user"); /** @TODO set right code **/
+                                    System.out.println("Unknown user");
+                                    break;
+                                }
+                                else{
+                                    forwardPaths.add(parameterArray[1]);
+                                    state = STATE_MAIL_RECIPIENTS;
+                                    /** @TODO go to DATA when all recipients are set **/
+                                }
                                 break;
                             case STATE_MAIL_BODY:
                                 break;
                         }
                         break;
                     case CMD_DATA:
+                        switch(this.state){
+                            //TODO voir les bons codes d'erreurs et les traiter de manière exhaustive
+                            case STATE_AUTHORIZATION:
+                                break;
+                            case STATE_AUTHENTICATED:
+                                break;
+                            case STATE_MAIL_RECIPIENTS:
+                                break;
+                            case STATE_MAIL_BODY:
+                                break;
+                        }
                         break;
                     case CMD_RSET:
                         break;
@@ -229,6 +262,9 @@ public class Server implements Runnable{
 
         /** Get username from user address **/
         String userName = userAddress.split("[@]")[0];
+        userName = userAddress.replaceAll("[<]]", "");
+        userName = userAddress.replaceAll("[>]]", "");
+
         String userStoragePath = this.SERVER_WAREHOUSE + userName + ".txt";
 
         File f = new File(userStoragePath);
