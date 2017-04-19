@@ -147,24 +147,48 @@ public class Server implements Runnable{
                         }
                         break;
                     case CMD_MAIL:
-                        messageReceived = this.messageUtils.read("\r\n");
-                        command = messageReceived.split("\\s+")[0].toUpperCase();
-                        parameters = messageReceived.split("\\s+");
-                        parameterArray = Arrays.copyOfRange(parameters, 1, parameters.length);
-                        System.out.println(parameterArray.toString());
-                        if (!parameterArray[0].toUpperCase().equals("FROM"))
-                            break;
-                        if (!userExists(parameterArray[1])){
-                            messageUtils.write("Unknown user"); /** @TODO set right code **/
-                            System.out.println("Unknown user");
-                            break;
-                        }
-                        else{
-                            messageUtils.write("HELLO !");
-                            /** @TODO go to RCPT TO and mail transaction **/
+                        switch(this.state){
+                            //TODO voir les bons codes d'erreurs et les traiter de manière exhaustive
+                            case STATE_AUTHORIZATION:
+                                break;
+                            case STATE_AUTHENTICATED:
+                                messageReceived = this.messageUtils.read("\r\n");
+                                command = messageReceived.split("\\s+")[0].toUpperCase();
+                                parameters = messageReceived.split("\\s+");
+                                parameterArray = Arrays.copyOfRange(parameters, 1, parameters.length);
+                                System.out.println(parameterArray.toString());
+                                if (!parameterArray[0].toUpperCase().equals("FROM"))
+                                    break;
+                                if (!userExists(parameterArray[1])){
+                                    messageUtils.write("Unknown user"); /** @TODO set right code **/
+                                    System.out.println("Unknown user");
+                                    break;
+                                }
+                                else{
+                                    messageUtils.write("HELLO !");
+                                    /** @TODO go to RCPT TO and mail transaction **/
+                                }
+                                break;
+                            case STATE_MAIL_RECIPIENTS:
+                                this.messageUtils.write(CODE_500 + " You must be authenticated first");
+                                break;
+                            case STATE_MAIL_BODY:
+                                this.messageUtils.write(CODE_500 + " You must be authenticated first");
+                                break;
                         }
                         break;
                     case CMD_RCPT:
+                        switch(this.state){
+                            //TODO voir les bons codes d'erreurs et les traiter de manière exhaustive
+                            case STATE_AUTHORIZATION:
+                                break;
+                            case STATE_AUTHENTICATED:
+                                break;
+                            case STATE_MAIL_RECIPIENTS:
+                                break;
+                            case STATE_MAIL_BODY:
+                                break;
+                        }
                         break;
                     case CMD_DATA:
                         break;
