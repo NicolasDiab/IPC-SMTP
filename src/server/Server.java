@@ -1,5 +1,6 @@
 package server;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.*;
 import java.sql.Timestamp;
@@ -24,6 +25,7 @@ public class Server implements Runnable{
     private String threadName = "ThreadInstance";
 
     private final String SERVER_DOMAIN = "univ-lyon1.fr";
+    private final String SERVER_WAREHOUSE = System.getProperty("user.dir") + "/tmp/warehouse/";
 
     /**
      * State constants
@@ -40,7 +42,7 @@ public class Server implements Runnable{
     private final String CMD_HELO = "HELO";
     private final String CMD_EHLO = "EHLO";
     private final String CMD_MAIL = "MAIL";
-    private final String CMD_RCPT = "RCPT";
+    private final String CMD_RCPT = "RCPT TO";
     private final String CMD_RSET = "RSET";
     private final String CMD_DATA = "DATA";
     private final String CMD_QUIT = "QUIT";
@@ -145,6 +147,22 @@ public class Server implements Runnable{
                         }
                         break;
                     case CMD_MAIL:
+                        messageReceived = this.messageUtils.read("\r\n");
+                        command = messageReceived.split("\\s+")[0].toUpperCase();
+                        parameters = messageReceived.split("\\s+");
+                        parameterArray = Arrays.copyOfRange(parameters, 1, parameters.length);
+                        System.out.println(parameterArray.toString());
+                        if (!parameterArray[0].toUpperCase().equals("FROM"))
+                            break;
+                        if (!userExists(parameterArray[1])){
+                            messageUtils.write("Unknown user"); /** @TODO set right code **/
+                            System.out.println("Unknown user");
+                            break;
+                        }
+                        else{
+                            messageUtils.write("HELLO !");
+                            /** @TODO go to RCPT TO and mail transaction **/
+                        }
                         break;
                     case CMD_RCPT:
                         break;
@@ -159,7 +177,7 @@ public class Server implements Runnable{
                                 // close the TCP connection
                                 connexion.close();
                                 // wait for a new client
-                                this.run();
+                                //this.run();
                                 break;
                         }
                         break;
@@ -181,5 +199,19 @@ public class Server implements Runnable{
             thread = new Thread (this, threadName);
             thread.start ();
         }
+    }
+
+    public boolean userExists(String userAddress){
+
+        /** Get username from user address **/
+        String userName = userAddress.split("[@]")[0];
+        String userStoragePath = this.SERVER_WAREHOUSE + userName + ".txt";
+
+        File f = new File(userStoragePath);
+        if (f.exists() && !f.isDirectory()) {
+            return true;
+        }
+
+        return false;
     }
 }
