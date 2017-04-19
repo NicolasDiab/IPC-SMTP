@@ -76,15 +76,16 @@ public class Server implements Runnable{
         this.port = port;
         this.threadName = threadName;
 
-        try {
-            SSLServerSocket secureSocket = null;
-            SSLServerSocketFactory factory = (SSLServerSocketFactory) SSLServerSocketFactory.getDefault();
-            secureSocket = (SSLServerSocket) factory.createServerSocket(port);
-            secureSocket.setEnabledCipherSuites(factory.getSupportedCipherSuites());
-            myconnex = secureSocket;
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        //try {
+            //ServerSocket myconnex = new ServerSocket(port,6);
+            //SSLServerSocket secureSocket = null;
+            //SSLServerSocketFactory factory = (SSLServerSocketFactory) SSLServerSocketFactory.getDefault();
+            //secureSocket = (SSLServerSocket) factory.createServerSocket(port);
+            //secureSocket.setEnabledCipherSuites(factory.getSupportedCipherSuites());
+            //myconnex = secureSocket;
+        //} catch (IOException e) {
+        //    e.printStackTrace();
+        //}
     }
 
     public void run(){
@@ -94,8 +95,10 @@ public class Server implements Runnable{
 
         try {
             System.out.println("Waiting for client");
-            SSLSocket connexion = null;
-            connexion = (SSLSocket) this.myconnex.accept();
+            ServerSocket myconnex = new ServerSocket(port,6);
+            Socket connexion = myconnex.accept();
+            //SSLSocket connexion = null;
+            //connexion = (SSLSocket) this.myconnex.accept();
 
             this.messageUtils = new Message(connexion);
 
@@ -125,7 +128,7 @@ public class Server implements Runnable{
                                     if (!parameterArray[0].equals(SERVER_DOMAIN))
                                         this.messageUtils.write(CODE_500 + " Incorrect server.domain");
                                     else {
-                                        this.messageUtils.write(CODE_250 + " server.domain");
+                                        this.messageUtils.write(CODE_250 + " server.domain says hello");
                                         this.state = STATE_AUTHENTICATED;
                                     }
                                 }
