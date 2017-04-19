@@ -72,6 +72,7 @@ public class Server implements Runnable{
     private String state;
     private ServerSocket myconnex;
     private List<String> forwardPaths;
+    private List<String> mailLines;
 
     // couche qui simplifie la gestion des échanges de message avec le client
     private Message messageUtils;
@@ -98,6 +99,7 @@ public class Server implements Runnable{
         System.out.println("Server started on " + threadName);
         this.state = STATE_LISTENING;
         forwardPaths = new ArrayList<>();
+        mailLines = new ArrayList<>();
 
         try {
             System.out.println("Waiting for client");
@@ -222,6 +224,21 @@ public class Server implements Runnable{
                             case STATE_MAIL_RECIPIENTS:
                                 break;
                             case STATE_MAIL_BODY:
+                                /** @TODO Data logic **/
+                                messageReceived = this.messageUtils.read("\r\n");
+                                command = messageReceived.split("\\s+")[0].toUpperCase();
+                                parameters = messageReceived.split("\\s+");
+                                parameterArray = Arrays.copyOfRange(parameters, 1, parameters.length);
+                                System.out.println(parameterArray.toString());
+
+                                if (parameterArray[1] == null){
+                                    messageUtils.write("Missing data"); /** @TODO set right code **/
+                                    System.out.println("Missing data");
+                                    break;
+                                }
+                                else{
+                                    mailLines.add(parameterArray[1]);
+                                }
                                 break;
                         }
                         break;
