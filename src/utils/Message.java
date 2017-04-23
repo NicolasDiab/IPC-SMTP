@@ -7,6 +7,7 @@ package utils;
 
 import java.io.BufferedOutputStream;
 import java.io.DataInputStream;
+import java.io.IOException;
 import java.io.OutputStream;
 import java.net.Socket;
 
@@ -58,7 +59,14 @@ public class Message {
         }
         catch (Exception e)
         {
-            e.printStackTrace();
+            //e.printStackTrace();
+        }
+        finally {
+            try {
+                this.socket.close();
+            } catch (IOException e) {
+                //e.printStackTrace();
+            }
         }
 
         return messageString;

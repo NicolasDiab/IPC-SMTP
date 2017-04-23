@@ -66,7 +66,7 @@ public class User {
 
     public boolean hasMail(int id) {
         for (Mail mail : mails) {
-            if (mail.getMessageId().equals(id + ""))
+            if (mail.getId()==id)
                 return true;
         }
         return false;
@@ -74,19 +74,9 @@ public class User {
 
     public Mail getMail(int id) {
         for (Mail mail : mails) {
-            if (mail.getMessageId().equals(id + ""))
+            if (mail.getId()==id)
                 return mail;
         }
         return null;
-    }
-
-    public boolean mailDeleted(int id) {
-        for (Mail mail : mails) {
-            if (mail.getMessageId().equals(id + "")) {
-                if (mail.getDeleted())
-                    return true;
-            }
-        }
-        return false;
     }
 }

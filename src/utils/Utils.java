@@ -5,38 +5,11 @@ import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.math.BigInteger;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.regex.Pattern;
 
 public class Utils {
-
-    /**
-     *
-     * @param timestamp long
-     * @return String
-     */
-    public static String computeChecksum(long timestamp){
-
-        try {
-            /** Compute base **/
-            String s = Long.toString(timestamp) + getSharedSecret();
-
-            System.out.println("SecretToHash:" + Long.toString(timestamp) + getSharedSecret());
-
-            /** Compute MD5 checksum **/
-            MessageDigest m = MessageDigest.getInstance("MD5");
-            m.update(s.getBytes(),0,s.length());
-            String checksum = (new BigInteger(1, m.digest()).toString(16));
-            return checksum;
-
-        }
-        catch (NoSuchAlgorithmException exc){
-            System.out.println(exc.getMessage());
-        }
-        return null;
-    }
 
     public static ArrayList<Mail> readMailsFromFile(String filepath){
         ArrayList<Mail> mails = new ArrayList<Mail>();
@@ -57,14 +30,16 @@ public class Utils {
             //System.out.println("Contents : " + fileAsString);
 
             /* Split each line */
-            String[] splittedMessage = fileAsString.split("\\r\\n|\\n|\\r");
+            String[] splitMessage = fileAsString.split("\\r\\n|\\n|\\r");
             ArrayList<String> newMail = new ArrayList<String>();
 
-            for (String split : splittedMessage){
+            // REVOIR SI NECESSAIRE
+            /*
+            for (String split : splitMessage){
                 if (!split.equals("")){
                     newMail.add(split);
                     if (split.startsWith(".")){
-                    /* Check that headers are enough */
+                    // Check that headers are enough
                         if (newMail.size() > 5){
                             ArrayList<String> headers = new ArrayList<String>();
                             headers.add(newMail.get(0));
@@ -77,8 +52,8 @@ public class Utils {
                             for (int i = 5; i < newMail.size(); ++ i)
                                 body += newMail.get(i) + "\n";
 
-                        /* Create a new message */
-                            Mail mail = new Mail(headers, body, new User("null", "null"));
+                        // Create a new message
+                            Mail mail = new Mail();
                             mails.add(mail);
                             newMail.clear();
 
@@ -86,18 +61,14 @@ public class Utils {
                     }
                 }
             }
+            */
+
         }
         catch (Exception e){
             e.printStackTrace();
         }
 
-
         return mails;
-    }
-
-
-    public static String getSharedSecret(){
-        return "SharedSecretRandom";
     }
 
     public static void displayMessage(){
@@ -114,17 +85,26 @@ public class Utils {
     }
 
 
-    public static void test(){
+    public static Mail test(){
         String userDir = System.getProperty("user.dir");
         System.out.println(userDir);
-        User nico = new User("Strelytsia", "nicotheheros@hotmail.fr");
-        ArrayList<String> headers = new ArrayList<>();
-        headers.add("jdoe@machine.example");
-        headers.add("mary@machine.example");
-        headers.add("Saying Hello");
-        headers.add("21 Nov 1997");
-        headers.add("1");
-        Mail mail = new Mail(headers, "Hello server, \r\nThis is a message just to say hello.\r\nSo, \"Hello\".", nico);
-        FileManager.storeMail(mail, false);
+        ArrayList<User> to = new ArrayList<>();
+        User user1 = new User("user1", "user1@test1.fr");
+        User user2 = new User("user2", "user2@test1.fr");
+        User user3 = new User("user3", "user3@test2.fr");
+        User user4 = new User("user4", "user4@test2.fr");
+
+        to.add(user2);
+        to.add(user3);
+        to.add(user4);
+
+        Mail mail = new Mail(0, user1, to, "Hello", new Date(), "Hello server, \r\nThis is a message just to say hello.\r\nSo, \"Hello\".");
+        return mail;
+    }
+
+    public static boolean emailValidator(String address){
+        return Pattern.compile("^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$")
+                .matcher(address)
+                .matches();
     }
 }

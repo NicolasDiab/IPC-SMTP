@@ -1,17 +1,20 @@
 package client;
 
-import utils.Console;
-import utils.Message;
+import utils.*;
 
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 import java.net.InetAddress;
+import java.util.ArrayList;
+import java.util.Date;
 
 public class Client {
     private int port;
     private String address;
 
     private Message messageUtils;
+
+    private SSLSocket connexion;
 
     public Client(int port) {
         this.port = port;
@@ -21,15 +24,17 @@ public class Client {
      * Connect to server
      * @return Socket
      */
-    public boolean connectToServer() {
+    private boolean connectToServer() {
         System.out.println("Connecting to server");
-        SSLSocket connexion = null;
+        connexion = null;
         try {
             SSLSocketFactory sslsocketfactory = (SSLSocketFactory) SSLSocketFactory.getDefault();
             connexion = (SSLSocket) sslsocketfactory.createSocket(InetAddress.getByName(this.address), this.port);
             connexion.setEnabledCipherSuites(sslsocketfactory.getSupportedCipherSuites());
             this.messageUtils = new Message(connexion);
-            return connexion.isConnected();
+            String answer = this.messageUtils.read("\r\n");
+            Console.display(answer);
+            return isSuccessful(answer);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -42,12 +47,11 @@ public class Client {
      *
      */
     public void launch(){
-        String msgHello = this.messageUtils.read("\r\n");
-
         boolean connected = false;
         while(!connected) {
-            connected = connection();
+            connected = connection() && ehlo();
         }
+        Console.display("Connexion effectuée avec succès.");
         boolean exit = false;
         while (!exit) {
             exit = commandSelection();
@@ -55,12 +59,12 @@ public class Client {
     }
 
     private boolean connection(){
-
-
         Console.display("Saisir l'adresse du serveur SMTP :");
+        this.address = Console.read();
         boolean connected = connectToServer();
         if(!connected)
             Console.display("La connexion a échoué.");
+
         return connected;
     }
 
@@ -71,13 +75,38 @@ public class Client {
                 + "2. Quitter\n");
         switch (command) {
             case 1:
-                sendMail();
+                boolean validEmail = false;
+                User uSender;
+                ArrayList<User> uRecipients;
+                do {
+                    Console.display("Saisir l'adresse mail de l'envoyeur :");
+                    String sender = Console.read();
+                    validEmail = Utils.emailValidator(sender);
+                    uSender = new User(sender.split("@")[0],sender);
+                }while(validEmail);
+                do {
+                    uRecipients = new ArrayList<>();
+                    Console.display("Saisir l'adresse mail des destinataires (séparés d'une virgule) :");
+                    String recipients = Console.read();
+                    String[] receptientsList = recipients.split(",");
+                    for (String recepient : receptientsList) {
+                        validEmail = Utils.emailValidator(recepient);
+                        uRecipients.add(new User(recepient.split("@")[0],recepient));
+                    }
+                }while(!validEmail);
+                Console.display("Sujet du mail :");
+                String subjet = Console.read();
+                Console.display("Corps du mail :");
+                String body = Console.read();
+                Mail mail = new Mail(0,uSender, uRecipients,subjet,new Date(), body);
+                //Mail mail = Utils.test();
+                sendMail(mail);
                 break;
             case 2:
-                quit();
+                exit = quit();
                 break;
             default:
-                Console.display("Fonction non disponible.");
+                Console.display("Fonctionnalité non disponible.");
                 break;
         }
         Console.display("Appuyez sur la touche 'Entrée' pour continuer.");
@@ -85,12 +114,44 @@ public class Client {
         return exit;
     }
 
-    private void sendMail(){
-
+    private boolean ehlo(){
+        messageUtils.write("EHLO "+connexion.getLocalAddress().toString());
+        for(int i = 0;i<5; i++){
+            String answer = this.messageUtils.read("\r\n");
+            Console.display(answer);
+            if(!isSuccessful(answer))
+                return false;
+        }
+        return true;
     }
 
-    private void quit(){
+    private void sendMail(Mail mail){
+        messageUtils.write("MAIL FROM: <"+mail.getFrom().getMailAddress()+">");
+        String answer = this.messageUtils.read("\r\n");
+        Console.display(answer);
+        if(!isSuccessful(answer))
+            Console.display("Error sending the mail (MAIL FROM)");
+        for(User u : mail.getTo()) {
+            messageUtils.write("RCPT TO: <" + u.getMailAddress() + ">");
+            answer = this.messageUtils.read("\r\n");
+            Console.display(answer);
+            if(!isSuccessful(answer))
+                Console.display("Error sending the mail (RCPT TO <"+u.getMailAddress()+">)");
+        }
+    }
 
+    private boolean quit(){
+        messageUtils.write("QUIT");
+        String answer = this.messageUtils.read("\r\n");
+        Console.display(answer);
+        if(!isSuccessful(answer))
+            return false;
+        return true;
+    }
+
+    private boolean isSuccessful(String message){
+        if(message=="") return false;
+        return message.substring(0,4).equals("250")||message.substring(0,4).equals("220")||message.substring(0,4).equals("221")||message.substring(0,4).equals("252")||message.substring(0,4).equals("251");
     }
 
 }
