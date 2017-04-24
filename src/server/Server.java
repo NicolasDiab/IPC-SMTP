@@ -195,21 +195,33 @@ public class Server implements Runnable {
                         switch (this.state) {
                             // @TODO voir les bons codes d'erreurs et les traiter de manière exhaustive
                             case STATE_AUTHORIZATION:
+                                this.messageUtils.write(CODE_500 + " You must be authenticated first");
+                                new ErrorManager(CODE_500 + "", "You must be authenticated first");
                                 break;
                             case STATE_AUTHENTICATED:
+                                this.messageUtils.write(CODE_500 + " You must be authenticated first");
+                                new ErrorManager(CODE_500 + "", "You must be authenticated first");
                                 break;
                             case STATE_MAIL_RECIPIENTS:
-                                if (!parameterArray[0].toUpperCase().equals("TO"))
-                                    break;
-                                if (!userExists(parameterArray[1])) {
-                                    messageUtils.write(CODE_500 + " Unknown user");
-                                    /** @TODO set right code **/
-                                    new ErrorManager(CODE_500 + "", "Unknown user");
-                                    break;
+                                if (parameterArray.length <= 1) {
+                                    // incorrect message size
+                                    this.messageUtils.write(CODE_500 + " Incorrect parameters (lacking from and/or username)");
+                                    new ErrorManager(CODE_500 + "",
+                                            "Incorrect parameters (lacking from and/or username)");
                                 } else {
-                                    forwardPaths.add(parameterArray[1]);
-                                    state = STATE_MAIL_RECIPIENTS;
-                                    /** @TODO go to DATA when all recipients are set **/
+                                    // Correct message size -> correct parameters ?
+                                    if (!parameterArray[0].toUpperCase().equals("TO"))
+                                        break;
+                                    if (!userExists(parameterArray[1])) {
+                                        messageUtils.write(CODE_500 + " Unknown user");
+                                        /** @TODO set right code **/
+                                        new ErrorManager(CODE_500 + "", "Unknown user");
+                                        break;
+                                    } else {
+                                        forwardPaths.add(parameterArray[1]);
+                                        state = STATE_MAIL_RECIPIENTS;
+                                        /** @TODO go to DATA when all recipients are set **/
+                                    }
                                 }
                                 break;
                             case STATE_MAIL_BODY:
