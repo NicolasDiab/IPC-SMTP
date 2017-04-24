@@ -37,13 +37,4 @@ public class FileManager {
         }
 
     }
-
-    /**
-     * @param user User
-     * @return a list of messages
-     */
-    public static ArrayList<Mail> retrieveMails(User user, boolean forTheClient) {
-        String filePath = (forTheClient ? CLIENT_STORAGE : SERVER_STORAGE) + user.getName() + ".mail";
-        return Utils.readMailsFromFile(filePath);
-    }
 }
