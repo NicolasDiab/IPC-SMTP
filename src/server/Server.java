@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import sun.rmi.runtime.Log;
 import utils.*;
 
 import javax.net.SocketFactory;
@@ -81,17 +82,6 @@ public class Server implements Runnable{
 
         this.port = port;
         this.threadName = threadName;
-
-        //try {
-            //ServerSocket myconnex = new ServerSocket(port,6);
-            //SSLServerSocket secureSocket = null;
-            //SSLServerSocketFactory factory = (SSLServerSocketFactory) SSLServerSocketFactory.getDefault();
-            //secureSocket = (SSLServerSocket) factory.createServerSocket(port);
-            //secureSocket.setEnabledCipherSuites(factory.getSupportedCipherSuites());
-            //myconnex = secureSocket;
-        //} catch (IOException e) {
-        //    e.printStackTrace();
-        //}
     }
 
     public void run(){
@@ -105,12 +95,9 @@ public class Server implements Runnable{
             System.out.println("Waiting for client");
             ServerSocket myconnex = new ServerSocket(port,6);
             Socket connexion = myconnex.accept();
-            //SSLSocket connexion = null;
-            //connexion = (SSLSocket) this.myconnex.accept();
 
             this.messageUtils = new Message(connexion);
 
-            // @TODO connect user
 
             this.messageUtils.write(MSG_HELLO);
             System.out.println(MSG_HELLO);
@@ -166,6 +153,7 @@ public class Server implements Runnable{
 
                                 if (!parameterArray[0].toUpperCase().equals("FROM")){
                                     messageUtils.write("Wrong command"); /** @TODO set right code **/
+                                    new ErrorManager("Wrong command", parameterArray[0].toUpperCase() + " doesn't exist");
                                     break;
                                 }
 
