@@ -128,7 +128,7 @@ public class Server implements Runnable{
                                     if (!parameterArray[0].equals(SERVER_DOMAIN))
                                         this.messageUtils.write(CODE_500 + " Incorrect server.domain");
                                     else {
-                                        this.messageUtils.write(CODE_250 + " server.domain says hello");
+                                        this.messageUtils.write(CODE_250 + " " + SERVER_DOMAIN + " says hello");
                                         this.state = STATE_AUTHENTICATED;
                                     }
                                 }
