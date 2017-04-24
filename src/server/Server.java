@@ -1,10 +1,14 @@
 package server;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.*;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+
+import sun.rmi.runtime.Log;
 import utils.*;
 
 import javax.net.SocketFactory;
@@ -17,9 +21,14 @@ import javax.net.ssl.SSLSocketFactory;
  * @author NicolasDiab
  * @author GregoirePiat <gregoire.piat@etu.univ-lyon1.fr>
  */
-public class Server {
+public class Server implements Runnable{
+
+
+    private Thread thread;
+    private String threadName = "ThreadInstance";
 
     private final String SERVER_DOMAIN = "univ-lyon1.fr";
+    private final String SERVER_WAREHOUSE = System.getProperty("user.dir") + "/tmp/warehouse/";
 
     /**
      * State constants
@@ -36,7 +45,7 @@ public class Server {
     private final String CMD_HELO = "HELO";
     private final String CMD_EHLO = "EHLO";
     private final String CMD_MAIL = "MAIL";
-    private final String CMD_RCPT = "RCPT";
+    private final String CMD_RCPT = "RCPT TO";
     private final String CMD_RSET = "RSET";
     private final String CMD_DATA = "DATA";
     private final String CMD_QUIT = "QUIT";
@@ -63,35 +72,32 @@ public class Server {
     private int port;
     private String state;
     private ServerSocket myconnex;
+    private List<String> forwardPaths;
+    private List<String> mailLines;
 
     // couche qui simplifie la gestion des échanges de message avec le client
     private Message messageUtils;
 
-    public Server (int port){
-        this.port = port;
+    public Server (int port, String threadName){
 
-        try {
-            SSLServerSocket secureSocket = null;
-            SSLServerSocketFactory factory = (SSLServerSocketFactory) SSLServerSocketFactory.getDefault();
-            secureSocket = (SSLServerSocket) factory.createServerSocket(port);
-            secureSocket.setEnabledCipherSuites(factory.getSupportedCipherSuites());
-            myconnex = secureSocket;
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        this.port = port;
+        this.threadName = threadName;
     }
 
     public void run(){
+
+        System.out.println("Server started on " + threadName);
         this.state = STATE_LISTENING;
+        forwardPaths = new ArrayList<>();
+        mailLines = new ArrayList<>();
 
         try {
             System.out.println("Waiting for client");
-            SSLSocket connexion = null;
-            connexion = (SSLSocket) this.myconnex.accept();
+            ServerSocket myconnex = new ServerSocket(port,6);
+            Socket connexion = myconnex.accept();
 
             this.messageUtils = new Message(connexion);
 
-            // @TODO connect user
 
             this.messageUtils.write(MSG_HELLO);
             System.out.println(MSG_HELLO);
@@ -117,7 +123,7 @@ public class Server {
                                     if (!parameterArray[0].equals(SERVER_DOMAIN))
                                         this.messageUtils.write(CODE_500 + " Incorrect server.domain");
                                     else {
-                                        this.messageUtils.write(CODE_250 + " server.domain");
+                                        this.messageUtils.write(CODE_250 + " server.domain says hello");
                                         this.state = STATE_AUTHENTICATED;
                                     }
                                 }
@@ -134,10 +140,99 @@ public class Server {
                         }
                         break;
                     case CMD_MAIL:
+                        switch(this.state){
+                            //TODO voir les bons codes d'erreurs et les traiter de manière exhaustive
+                            case STATE_AUTHORIZATION:
+                                break;
+                            case STATE_AUTHENTICATED:
+                                messageReceived = this.messageUtils.read("\r\n");
+                                command = messageReceived.split("\\s+")[0].toUpperCase();
+                                parameters = messageReceived.split("\\s+");
+                                parameterArray = Arrays.copyOfRange(parameters, 1, parameters.length);
+                                System.out.println(parameterArray.toString());
+
+                                if (!parameterArray[0].toUpperCase().equals("FROM")){
+                                    messageUtils.write("Wrong command"); /** @TODO set right code **/
+                                    new ErrorManager("Wrong command", parameterArray[0].toUpperCase() + " doesn't exist");
+                                    break;
+                                }
+
+                                if (!userExists(parameterArray[1])){
+                                    messageUtils.write("Unknown user"); /** @TODO set right code **/
+                                    System.out.println("Unknown user");
+                                    break;
+                                }
+                                else {
+                                    messageUtils.write("HELLO !");
+                                    state = STATE_MAIL_RECIPIENTS;
+                                    /** @TODO go to RCPT TO and mail transaction **/
+                                }
+                                break;
+                            case STATE_MAIL_RECIPIENTS:
+                                this.messageUtils.write(CODE_500 + " You must be authenticated first");
+                                break;
+                            case STATE_MAIL_BODY:
+                                this.messageUtils.write(CODE_500 + " You must be authenticated first");
+                                break;
+                        }
                         break;
                     case CMD_RCPT:
+                        switch(this.state){
+                            //TODO voir les bons codes d'erreurs et les traiter de manière exhaustive
+                            case STATE_AUTHORIZATION:
+                                break;
+                            case STATE_AUTHENTICATED:
+                                break;
+                            case STATE_MAIL_RECIPIENTS:
+                                messageReceived = this.messageUtils.read("\r\n");
+                                command = messageReceived.split("\\s+")[0].toUpperCase();
+                                parameters = messageReceived.split("\\s+");
+                                parameterArray = Arrays.copyOfRange(parameters, 1, parameters.length);
+                                System.out.println(parameterArray.toString());
+                                if (!parameterArray[0].toUpperCase().equals("TO"))
+                                    break;
+                                if (!userExists(parameterArray[1])){
+                                    messageUtils.write("Unknown user"); /** @TODO set right code **/
+                                    System.out.println("Unknown user");
+                                    break;
+                                }
+                                else{
+                                    forwardPaths.add(parameterArray[1]);
+                                    state = STATE_MAIL_RECIPIENTS;
+                                    /** @TODO go to DATA when all recipients are set **/
+                                }
+                                break;
+                            case STATE_MAIL_BODY:
+                                break;
+                        }
                         break;
                     case CMD_DATA:
+                        switch(this.state){
+                            //TODO voir les bons codes d'erreurs et les traiter de manière exhaustive
+                            case STATE_AUTHORIZATION:
+                                break;
+                            case STATE_AUTHENTICATED:
+                                break;
+                            case STATE_MAIL_RECIPIENTS:
+                                break;
+                            case STATE_MAIL_BODY:
+                                /** @TODO Data logic **/
+                                messageReceived = this.messageUtils.read("\r\n");
+                                command = messageReceived.split("\\s+")[0].toUpperCase();
+                                parameters = messageReceived.split("\\s+");
+                                parameterArray = Arrays.copyOfRange(parameters, 1, parameters.length);
+                                System.out.println(parameterArray.toString());
+
+                                if (parameterArray[1] == null){
+                                    messageUtils.write("Missing data"); /** @TODO set right code **/
+                                    System.out.println("Missing data");
+                                    break;
+                                }
+                                else{
+                                    mailLines.add(parameterArray[1]);
+                                }
+                                break;
+                        }
                         break;
                     case CMD_RSET:
                         break;
@@ -148,7 +243,7 @@ public class Server {
                                 // close the TCP connection
                                 connexion.close();
                                 // wait for a new client
-                                this.run();
+                                //this.run();
                                 break;
                         }
                         break;
@@ -162,5 +257,30 @@ public class Server {
         catch(IOException ex){
             ex.printStackTrace();
         }
+    }
+
+    public void start () {
+        System.out.println("Starting " +  threadName );
+        if (thread == null) {
+            thread = new Thread (this, threadName);
+            thread.start ();
+        }
+    }
+
+    public boolean userExists(String userAddress){
+
+        /** Get username from user address **/
+        String userName = userAddress.split("[@]")[0];
+        userName = userAddress.replaceAll("[<]]", "");
+        userName = userAddress.replaceAll("[>]]", "");
+
+        String userStoragePath = this.SERVER_WAREHOUSE + userName + ".txt";
+
+        File f = new File(userStoragePath);
+        if (f.exists() && !f.isDirectory()) {
+            return true;
+        }
+
+        return false;
     }
 }

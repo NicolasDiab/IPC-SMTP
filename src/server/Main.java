@@ -1,8 +1,9 @@
 package server;
 
-import utils.Utils;
+import utils.LogManager;
 
 import javax.rmi.CORBA.Util;
+import java.io.IOException;
 
 /**
  * @author NicolasDiab
@@ -11,7 +12,8 @@ import javax.rmi.CORBA.Util;
 public class Main {
     public static void main(String [ ] args)
     {
-        Server server = new Server(2222);
-        server.run();
+        LogManager logManager = new LogManager("Test Name", "Test error content");
+        //Server server = new Server(2222);
+        //server.run();
     }
 }
