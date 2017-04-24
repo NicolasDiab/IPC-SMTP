@@ -163,14 +163,18 @@ public class Server implements Runnable{
                                 parameters = messageReceived.split("\\s+");
                                 parameterArray = Arrays.copyOfRange(parameters, 1, parameters.length);
                                 System.out.println(parameterArray.toString());
-                                if (!parameterArray[0].toUpperCase().equals("FROM"))
+
+                                if (!parameterArray[0].toUpperCase().equals("FROM")){
+                                    messageUtils.write("Wrong command"); /** @TODO set right code **/
                                     break;
+                                }
+
                                 if (!userExists(parameterArray[1])){
                                     messageUtils.write("Unknown user"); /** @TODO set right code **/
                                     System.out.println("Unknown user");
                                     break;
                                 }
-                                else{
+                                else {
                                     messageUtils.write("HELLO !");
                                     state = STATE_MAIL_RECIPIENTS;
                                     /** @TODO go to RCPT TO and mail transaction **/
