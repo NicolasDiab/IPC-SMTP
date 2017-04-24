@@ -64,7 +64,7 @@ public class Server implements Runnable {
     private int CODE_501 = 501;
     private int CODE_502 = 502;
 
-    private String MSG_HELLO = CODE_220 + " " + SERVER_DOMAIN + " SMTP";
+    private String MSG_HELLO = CODE_220 + " " + SERVER_DOMAIN + " SMTP READY";
 
     /**
      * Properties
@@ -274,9 +274,9 @@ public class Server implements Runnable {
     public boolean userExists(String userAddress) {
 
         /** Get username from user address **/
-        String userName = userAddress.split("[@]")[0];
-        userName = userAddress.replaceAll("[<]]", "");
-        userName = userAddress.replaceAll("[>]]", "");
+        String userName = userAddress.substring(0, userAddress.indexOf('@'));
+        userName = userName.replaceAll("[<]", "");
+        userName = userName.replaceAll("[>]", "");
 
         String userStoragePath = this.SERVER_WAREHOUSE + userName + ".txt";
 
