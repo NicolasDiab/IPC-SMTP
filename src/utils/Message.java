@@ -75,6 +75,8 @@ public class Message {
             BufferedOutputStream bos = new BufferedOutputStream(os);
             bos.write((message + MSG_END).getBytes());
             bos.flush();
+
+            System.out.println("Message sent: " + message);
         }
         catch (Exception e) {
             System.err.println(e);

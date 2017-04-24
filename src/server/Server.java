@@ -21,7 +21,7 @@ import javax.net.ssl.SSLSocketFactory;
  * @author NicolasDiab
  * @author GregoirePiat <gregoire.piat@etu.univ-lyon1.fr>
  */
-public class Server implements Runnable{
+public class Server implements Runnable {
 
 
     private Thread thread;
@@ -83,13 +83,13 @@ public class Server implements Runnable{
     // couche qui simplifie la gestion des échanges de message avec le client
     private Message messageUtils;
 
-    public Server (int port, String threadName){
+    public Server(int port, String threadName) {
 
         this.port = port;
         this.threadName = threadName;
     }
 
-    public void run(){
+    public void run() {
 
         System.out.println("Server started on " + threadName);
         this.state = STATE_LISTENING;
@@ -98,28 +98,27 @@ public class Server implements Runnable{
 
         try {
             System.out.println("Waiting for client");
-            myconnex = new ServerSocket(port,6);
+            myconnex = new ServerSocket(port, 6);
             connexion = myconnex.accept();
 
             this.messageUtils = new Message(connexion);
 
 
             this.messageUtils.write(MSG_HELLO);
-            System.out.println(MSG_HELLO);
 
             this.state = STATE_AUTHORIZATION;
 
-            while (!connexion.isClosed()){
+            while (!connexion.isClosed()) {
                 String messageReceived = this.messageUtils.read("\r\n");
                 String command = messageReceived.split("\\s+")[0].toUpperCase();
                 String[] parameters = messageReceived.split("\\s+");
                 String[] parameterArray = Arrays.copyOfRange(parameters, 1, parameters.length);
                 System.out.println("Command " + command);
 
-                switch(command) {
+                switch (command) {
                     case CMD_EHLO:
                     case CMD_HELO:
-                        switch(this.state){
+                        switch (this.state) {
                             //TODO voir les bons codes d'erreurs et les traiter de manière exhaustive
                             case STATE_AUTHORIZATION:
                                 if (parameterArray.length <= 0) {
@@ -150,7 +149,7 @@ public class Server implements Runnable{
                         }
                         break;
                     case CMD_MAIL:
-                        switch(this.state){
+                        switch (this.state) {
                             //TODO voir les bons codes d'erreurs et les traiter de manière exhaustive
                             case STATE_AUTHORIZATION:
                                 break;
@@ -193,7 +192,7 @@ public class Server implements Runnable{
                         }
                         break;
                     case CMD_RCPT:
-                        switch(this.state){
+                        switch (this.state) {
                             // @TODO voir les bons codes d'erreurs et les traiter de manière exhaustive
                             case STATE_AUTHORIZATION:
                                 break;
@@ -202,13 +201,12 @@ public class Server implements Runnable{
                             case STATE_MAIL_RECIPIENTS:
                                 if (!parameterArray[0].toUpperCase().equals("TO"))
                                     break;
-                                if (!userExists(parameterArray[1])){
+                                if (!userExists(parameterArray[1])) {
                                     messageUtils.write(CODE_500 + " Unknown user");
                                     /** @TODO set right code **/
                                     new ErrorManager(CODE_500 + "", "Unknown user");
                                     break;
-                                }
-                                else{
+                                } else {
                                     forwardPaths.add(parameterArray[1]);
                                     state = STATE_MAIL_RECIPIENTS;
                                     /** @TODO go to DATA when all recipients are set **/
@@ -219,7 +217,7 @@ public class Server implements Runnable{
                         }
                         break;
                     case CMD_DATA:
-                        switch(this.state){
+                        switch (this.state) {
                             //TODO voir les bons codes d'erreurs et les traiter de manière exhaustive
                             case STATE_AUTHORIZATION:
                                 break;
@@ -229,12 +227,12 @@ public class Server implements Runnable{
                                 break;
                             case STATE_MAIL_BODY:
                                 /** @TODO Data logic **/
-                                if (parameterArray[1] == null){
-                                    messageUtils.write("Missing data"); /** @TODO set right code **/
-                                    System.out.println("Missing data");
+                                if (parameterArray[1] == null) {
+                                    messageUtils.write(CODE_500 + " Missing data");
+                                    /** @TODO set right code **/
+                                    new ErrorManager(CODE_500 + "", "Missing data");
                                     break;
-                                }
-                                else{
+                                } else {
                                     mailLines.add(parameterArray[1]);
                                 }
                                 break;
@@ -243,7 +241,7 @@ public class Server implements Runnable{
                     case CMD_RSET:
                         break;
                     case CMD_QUIT:
-                        switch(this.state){
+                        switch (this.state) {
                             case STATE_AUTHORIZATION:
                                 //this.messageUtils.write(MSG_OK + " SMTP server signing off");
                                 // close the TCP connection
@@ -255,26 +253,25 @@ public class Server implements Runnable{
                         break;
                     default:
                         this.messageUtils.write(CODE_500 + " invalid command");
+                        new ErrorManager(CODE_500 + "", "invalid command");
                         break;
                 }
             }
-
-        }
-        catch(IOException ex){
+        } catch (IOException ex) {
             System.out.println("Une exception inatendue est survenue !!!!!!!!!!!!!!!");
             ex.printStackTrace();
         }
     }
 
-    public void start () {
-        System.out.println("Starting " +  threadName );
+    public void start() {
+        System.out.println("Starting " + threadName);
         if (thread == null) {
-            thread = new Thread (this, threadName);
-            thread.start ();
+            thread = new Thread(this, threadName);
+            thread.start();
         }
     }
 
-    public boolean userExists(String userAddress){
+    public boolean userExists(String userAddress) {
 
         /** Get username from user address **/
         String userName = userAddress.split("[@]")[0];
