@@ -286,9 +286,13 @@ public class Server implements Runnable {
     public boolean userExists(String userAddress) {
 
         /** Get username from user address **/
-        String userName = userAddress.substring(0, userAddress.indexOf('@'));
-        userName = userName.replaceAll("[<]", "");
+        String userName = userAddress.replaceAll("[<]", "");
         userName = userName.replaceAll("[>]", "");
+
+        if (!Utils.emailValidator(userName))
+            return false;
+
+        userName = userAddress.substring(0, userAddress.indexOf('@'));
 
         String userStoragePath = this.SERVER_WAREHOUSE + userName + ".txt";
 
