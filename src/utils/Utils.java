@@ -9,6 +9,7 @@ import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.regex.Pattern;
 
 public class Utils {
 
@@ -41,6 +42,12 @@ public class Utils {
 
     public static String getSharedSecret(){
         return "SharedSecretRandom";
+    }
+
+    public static boolean emailValidator(String address){
+        return Pattern.compile("^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$")
+                .matcher(address)
+                .matches();
     }
 
     public static void displayMessage(){
