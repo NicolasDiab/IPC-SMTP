@@ -61,13 +61,6 @@ public class Message {
         {
             //e.printStackTrace();
         }
-        finally {
-            try {
-                this.socket.close();
-            } catch (IOException e) {
-                //e.printStackTrace();
-            }
-        }
 
         return messageString;
     }

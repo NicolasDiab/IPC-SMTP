@@ -71,9 +71,14 @@ public class Server implements Runnable{
      */
     private int port;
     private String state;
-    private ServerSocket myconnex;
     private List<String> forwardPaths;
     private List<String> mailLines;
+
+    /**
+     * Connections
+     */
+    private Socket connexion;
+    private ServerSocket myconnex;
 
     // couche qui simplifie la gestion des échanges de message avec le client
     private Message messageUtils;
@@ -93,8 +98,8 @@ public class Server implements Runnable{
 
         try {
             System.out.println("Waiting for client");
-            ServerSocket myconnex = new ServerSocket(port,6);
-            Socket connexion = myconnex.accept();
+            myconnex = new ServerSocket(port,6);
+            connexion = myconnex.accept();
 
             this.messageUtils = new Message(connexion);
 
@@ -255,6 +260,7 @@ public class Server implements Runnable{
 
         }
         catch(IOException ex){
+            System.out.println("Une exception inatendue est survenue !!!!!!!!!!!!!!!");
             ex.printStackTrace();
         }
     }
