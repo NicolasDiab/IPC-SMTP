@@ -122,12 +122,14 @@ public class Server implements Runnable{
                         switch(this.state){
                             //TODO voir les bons codes d'erreurs et les traiter de manière exhaustive
                             case STATE_AUTHORIZATION:
-                                if (parameterArray.length <= 0)
+                                if (parameterArray.length <= 0) {
                                     this.messageUtils.write(CODE_500 + " Incorrect parameters (lacking server.domain)");
-                                else {
-                                    if (!parameterArray[0].equals(SERVER_DOMAIN))
+                                    new ErrorManager(CODE_500 + "", "Incorrect parameters (lacking server.domain)");
+                                } else {
+                                    if (!parameterArray[0].equals(SERVER_DOMAIN)) {
                                         this.messageUtils.write(CODE_500 + " Incorrect server.domain");
-                                    else {
+                                        new ErrorManager(CODE_500 + "", "Incorrect server.domain");
+                                    } else {
                                         this.messageUtils.write(CODE_250 + " " + SERVER_DOMAIN + " says hello");
                                         this.state = STATE_AUTHENTICATED;
                                     }
@@ -135,12 +137,15 @@ public class Server implements Runnable{
                                 break;
                             case STATE_AUTHENTICATED:
                                 this.messageUtils.write(CODE_500 + " Already authenticated");
+                                new ErrorManager(CODE_500 + "", "Already authenticated");
                                 break;
                             case STATE_MAIL_RECIPIENTS:
                                 this.messageUtils.write(CODE_500 + " Already authenticated");
+                                new ErrorManager(CODE_500 + "", "Already authenticated");
                                 break;
                             case STATE_MAIL_BODY:
                                 this.messageUtils.write(CODE_500 + " Already authenticated");
+                                new ErrorManager(CODE_500 + "", "Already authenticated");
                                 break;
                         }
                         break;
@@ -150,55 +155,57 @@ public class Server implements Runnable{
                             case STATE_AUTHORIZATION:
                                 break;
                             case STATE_AUTHENTICATED:
-                                messageReceived = this.messageUtils.read("\r\n");
-                                command = messageReceived.split("\\s+")[0].toUpperCase();
-                                parameters = messageReceived.split("\\s+");
-                                parameterArray = Arrays.copyOfRange(parameters, 1, parameters.length);
-                                System.out.println(parameterArray.toString());
+                                if (parameterArray.length <= 1) {
+                                    // incorrect message size
+                                    this.messageUtils.write(CODE_500 + " Incorrect parameters (lacking from and/or username)");
+                                    new ErrorManager(CODE_500 + "",
+                                            "Incorrect parameters (lacking from and/or username)");
+                                } else {
+                                    // Correct message size -> correct parameters ?
+                                    if (!parameterArray[0].toUpperCase().equals("FROM")) {
+                                        messageUtils.write(CODE_500 + parameterArray[0].toUpperCase() + " doesn't exist");
+                                        /** @TODO set right code **/
+                                        new ErrorManager(CODE_500 + "Wrong command",
+                                                parameterArray[0].toUpperCase() + " doesn't exist");
+                                        break;
+                                    }
 
-                                if (!parameterArray[0].toUpperCase().equals("FROM")){
-                                    messageUtils.write("Wrong command"); /** @TODO set right code **/
-                                    new ErrorManager("Wrong command", parameterArray[0].toUpperCase() + " doesn't exist");
-                                    break;
-                                }
-
-                                if (!userExists(parameterArray[1])){
-                                    messageUtils.write("Unknown user"); /** @TODO set right code **/
-                                    System.out.println("Unknown user");
-                                    break;
-                                }
-                                else {
-                                    messageUtils.write("HELLO !");
-                                    state = STATE_MAIL_RECIPIENTS;
-                                    /** @TODO go to RCPT TO and mail transaction **/
+                                    // rigthly-formated command -> does the typed user exist ?
+                                    if (!userExists(parameterArray[1])) {
+                                        messageUtils.write(CODE_500 + " Unknown user");
+                                        /** @TODO set right code **/
+                                        new ErrorManager(CODE_500 + "", "Unknown user");
+                                    } else {
+                                        messageUtils.write("HELLO !");
+                                        state = STATE_MAIL_RECIPIENTS;
+                                        /** @TODO go to RCPT TO and mail transaction **/
+                                    }
                                 }
                                 break;
                             case STATE_MAIL_RECIPIENTS:
                                 this.messageUtils.write(CODE_500 + " You must be authenticated first");
+                                new ErrorManager(CODE_500 + "", "You must be authenticated first");
                                 break;
                             case STATE_MAIL_BODY:
                                 this.messageUtils.write(CODE_500 + " You must be authenticated first");
+                                new ErrorManager(CODE_500 + "", "You must be authenticated first");
                                 break;
                         }
                         break;
                     case CMD_RCPT:
                         switch(this.state){
-                            //TODO voir les bons codes d'erreurs et les traiter de manière exhaustive
+                            // @TODO voir les bons codes d'erreurs et les traiter de manière exhaustive
                             case STATE_AUTHORIZATION:
                                 break;
                             case STATE_AUTHENTICATED:
                                 break;
                             case STATE_MAIL_RECIPIENTS:
-                                messageReceived = this.messageUtils.read("\r\n");
-                                command = messageReceived.split("\\s+")[0].toUpperCase();
-                                parameters = messageReceived.split("\\s+");
-                                parameterArray = Arrays.copyOfRange(parameters, 1, parameters.length);
-                                System.out.println(parameterArray.toString());
                                 if (!parameterArray[0].toUpperCase().equals("TO"))
                                     break;
                                 if (!userExists(parameterArray[1])){
-                                    messageUtils.write("Unknown user"); /** @TODO set right code **/
-                                    System.out.println("Unknown user");
+                                    messageUtils.write(CODE_500 + " Unknown user");
+                                    /** @TODO set right code **/
+                                    new ErrorManager(CODE_500 + "", "Unknown user");
                                     break;
                                 }
                                 else{
@@ -222,12 +229,6 @@ public class Server implements Runnable{
                                 break;
                             case STATE_MAIL_BODY:
                                 /** @TODO Data logic **/
-                                messageReceived = this.messageUtils.read("\r\n");
-                                command = messageReceived.split("\\s+")[0].toUpperCase();
-                                parameters = messageReceived.split("\\s+");
-                                parameterArray = Arrays.copyOfRange(parameters, 1, parameters.length);
-                                System.out.println(parameterArray.toString());
-
                                 if (parameterArray[1] == null){
                                     messageUtils.write("Missing data"); /** @TODO set right code **/
                                     System.out.println("Missing data");
