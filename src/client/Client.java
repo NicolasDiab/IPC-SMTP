@@ -80,18 +80,22 @@ public class Client {
                 ArrayList<User> uRecipients;
                 do {
                     Console.display("Saisir l'adresse mail de l'envoyeur :");
-                    String sender = Console.read();
+                    String sender = Console.read().trim();
                     validEmail = Utils.emailValidator(sender);
                     uSender = new User(sender.split("@")[0],sender);
-                }while(validEmail);
+                    if(!validEmail)
+                        Console.display("L'adresse mail <"+sender+"> n'est pas valide.");
+                }while(!validEmail);
                 do {
                     uRecipients = new ArrayList<>();
                     Console.display("Saisir l'adresse mail des destinataires (séparés d'une virgule) :");
-                    String recipients = Console.read();
+                    String recipients = Console.read().trim();
                     String[] receptientsList = recipients.split(",");
                     for (String recepient : receptientsList) {
-                        validEmail = Utils.emailValidator(recepient);
+                        validEmail = Utils.emailValidator(recepient.trim());
                         uRecipients.add(new User(recepient.split("@")[0],recepient));
+                        if(!validEmail)
+                            Console.display("L'adresse mail <"+recepient+"> n'est pas valide.");
                     }
                 }while(!validEmail);
                 Console.display("Sujet du mail :");
@@ -115,13 +119,13 @@ public class Client {
     }
 
     private boolean ehlo(){
-        messageUtils.write("EHLO "+connexion.getLocalAddress().toString());
-        for(int i = 0;i<5; i++){
+        messageUtils.write("EHLO univ-lyon1.fr");
+        //for(int i = 0;i<5; i++){
             String answer = this.messageUtils.read("\r\n");
             Console.display(answer);
             if(!isSuccessful(answer))
                 return false;
-        }
+        //}
         return true;
     }
 
@@ -151,7 +155,8 @@ public class Client {
 
     private boolean isSuccessful(String message){
         if(message=="") return false;
-        return message.substring(0,4).equals("250")||message.substring(0,4).equals("220")||message.substring(0,4).equals("221")||message.substring(0,4).equals("252")||message.substring(0,4).equals("251");
+        String sub = message.substring(0,3);
+        return sub.equals("250")||sub.equals("220")||sub.equals("221")||sub.equals("252")||sub.equals("251");
     }
 
 }
