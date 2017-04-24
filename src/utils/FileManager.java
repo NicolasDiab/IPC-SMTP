@@ -35,6 +35,5 @@ public class FileManager {
                 System.out.println(e.getMessage());
             }
         }
-
     }
 }
