@@ -156,9 +156,9 @@ public class Server implements Runnable {
                             case STATE_AUTHENTICATED:
                                 if (parameterArray.length <= 1) {
                                     // incorrect message size
-                                    this.messageUtils.write(CODE_500 + " Incorrect parameters (lacking from and/or username)");
+                                    this.messageUtils.write(CODE_500 + " Incorrect parameters (lacking FROM and/or username)");
                                     new ErrorManager(CODE_500 + "",
-                                            "Incorrect parameters (lacking from and/or username)");
+                                            "Incorrect parameters (lacking FROM and/or username)");
                                 } else {
                                     // Correct message size -> correct parameters ?
                                     if (!parameterArray[0].toUpperCase().equals("FROM")) {
@@ -175,9 +175,10 @@ public class Server implements Runnable {
                                         /** @TODO set right code **/
                                         new ErrorManager(CODE_500 + "", "Unknown user");
                                     } else {
-                                        messageUtils.write("HELLO !");
+                                        // ALL OK - switch to recipients state
+                                        messageUtils.write(CODE_250 + " OK");
                                         state = STATE_MAIL_RECIPIENTS;
-                                        /** @TODO go to RCPT TO and mail transaction **/
+                                        this.forwardPaths.clear();
                                     }
                                 }
                                 break;
@@ -205,9 +206,9 @@ public class Server implements Runnable {
                             case STATE_MAIL_RECIPIENTS:
                                 if (parameterArray.length <= 1) {
                                     // incorrect message size
-                                    this.messageUtils.write(CODE_500 + " Incorrect parameters (lacking from and/or username)");
+                                    this.messageUtils.write(CODE_500 + " Incorrect parameters (lacking TO and/or username)");
                                     new ErrorManager(CODE_500 + "",
-                                            "Incorrect parameters (lacking from and/or username)");
+                                            "Incorrect parameters (lacking TO and/or username)");
                                 } else {
                                     // Correct message size -> correct parameters ?
                                     if (!parameterArray[0].toUpperCase().equals("TO"))
@@ -218,13 +219,15 @@ public class Server implements Runnable {
                                         new ErrorManager(CODE_500 + "", "Unknown user");
                                         break;
                                     } else {
-                                        forwardPaths.add(parameterArray[1]);
-                                        state = STATE_MAIL_RECIPIENTS;
-                                        /** @TODO go to DATA when all recipients are set **/
+                                        // ALL OK - add the recipient
+                                        this.forwardPaths.add(parameterArray[1]);
+                                        messageUtils.write(CODE_250 + " OK");
                                     }
                                 }
                                 break;
                             case STATE_MAIL_BODY:
+                                this.messageUtils.write(CODE_500 + " You have already selected the recipients. Please type the mail body");
+                                new ErrorManager(CODE_500 + "", "You have already selected the recipients. Please type the mail body");
                                 break;
                         }
                         break;
@@ -232,21 +235,24 @@ public class Server implements Runnable {
                         switch (this.state) {
                             //TODO voir les bons codes d'erreurs et les traiter de manière exhaustive
                             case STATE_AUTHORIZATION:
+                                this.messageUtils.write(CODE_500 + " You must be authenticated first");
+                                new ErrorManager(CODE_500 + "", "You must be authenticated first");
                                 break;
                             case STATE_AUTHENTICATED:
+                                this.messageUtils.write(CODE_500 + " You must send recipients first");
+                                new ErrorManager(CODE_500 + "", "You must send recipients first");
                                 break;
                             case STATE_MAIL_RECIPIENTS:
+                                // Wait for the mail body
+                                this.state = STATE_MAIL_BODY;
+                                this.messageUtils.write(CODE_354 + " Begin message ; end with <CRLF>.<CRLF>");
+                                // Waiting for message
+                                String typedMessage = this.messageUtils.read("\r\n.\r\n");
+                                //TODO - sauvegarder msg dans le fichier ?
                                 break;
                             case STATE_MAIL_BODY:
-                                /** @TODO Data logic **/
-                                if (parameterArray[1] == null) {
-                                    messageUtils.write(CODE_500 + " Missing data");
-                                    /** @TODO set right code **/
-                                    new ErrorManager(CODE_500 + "", "Missing data");
-                                    break;
-                                } else {
-                                    mailLines.add(parameterArray[1]);
-                                }
+                                this.messageUtils.write(CODE_500 + " You have already typing a message");
+                                new ErrorManager(CODE_500 + "", "You have already typing a message");
                                 break;
                         }
                         break;
@@ -292,7 +298,7 @@ public class Server implements Runnable {
         if (!Utils.emailValidator(userName))
             return false;
 
-        userName = userAddress.substring(0, userAddress.indexOf('@'));
+        userName = userName.substring(0, userName.indexOf('@'));
 
         String userStoragePath = this.SERVER_WAREHOUSE + userName + ".txt";
 
