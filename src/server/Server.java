@@ -56,6 +56,7 @@ public class Server implements Runnable {
      * Success codes
      */
     private int CODE_220 = 220;
+    private int CODE_221 = 221; // server signing off
     private int CODE_250 = 250;
     private int CODE_354 = 354;
 
@@ -144,10 +145,6 @@ public class Server implements Runnable {
                                 this.messageUtils.write(CODE_500 + " Already authenticated");
                                 new ErrorManager(CODE_500 + "", "Already authenticated");
                                 break;
-                            case STATE_MAIL_BODY:
-                                this.messageUtils.write(CODE_500 + " Already authenticated");
-                                new ErrorManager(CODE_500 + "", "Already authenticated");
-                                break;
                         }
                         break;
                     case CMD_MAIL:
@@ -189,10 +186,6 @@ public class Server implements Runnable {
                                 this.messageUtils.write(CODE_500 + " Please type the recipients");
                                 new ErrorManager(CODE_500 + "", "Please type the recipients");
                                 break;
-                            case STATE_MAIL_BODY:
-                                this.messageUtils.write(CODE_500 + " Please type the mail body");
-                                new ErrorManager(CODE_500 + "", "Please type the mail body");
-                                break;
                         }
                         break;
                     case CMD_RCPT:
@@ -228,10 +221,6 @@ public class Server implements Runnable {
                                     }
                                 }
                                 break;
-                            case STATE_MAIL_BODY:
-                                this.messageUtils.write(CODE_500 + " You have already selected the recipients. Please type the mail body");
-                                new ErrorManager(CODE_500 + "", "You have already selected the recipients. Please type the mail body");
-                                break;
                         }
                         break;
                     case CMD_DATA:
@@ -263,28 +252,39 @@ public class Server implements Runnable {
                                 // Create mail object from typed informations
                                 Mail mail = new Mail(0, this.messageFrom, this.forwardPaths, "", new Date(), typedMessage);
 
-                                // Save message in local files
+                                // Send mail
                                 mail.send();
 
-                                break;
-                            case STATE_MAIL_BODY:
-                                this.messageUtils.write(CODE_500 + " You have already typing a message");
-                                new ErrorManager(CODE_500 + "", "You have already typing a message");
+                                this.messageUtils.write(CODE_250 + " OK");
+
+                                // Go back to authenticated State
+                                this.state = STATE_AUTHENTICATED;
+                                // clear variables
+                                this.forwardPaths.clear();
+                                this.messageFrom = null;
+
                                 break;
                         }
                         break;
                     case CMD_RSET:
+                        // WARNING !! Accessible from all states
+                        // Go back to Authorization State
+                        this.state = STATE_AUTHORIZATION;
+                        // clear variables
+                        this.forwardPaths.clear();
+                        this.messageFrom = null;
+
+                        this.messageUtils.write(CODE_250 + " OK");
                         break;
                     case CMD_QUIT:
-                        switch (this.state) {
-                            case STATE_AUTHORIZATION:
-                                //this.messageUtils.write(MSG_OK + " SMTP server signing off");
-                                // close the TCP connection
-                                connexion.close();
-                                // wait for a new client
-                                //this.run();
-                                break;
-                        }
+                        // WARNING !! Accessible from all states
+                        this.messageUtils.write(CODE_221 + " SMTP server signing off");
+                        // close the TCP connection
+                        this.connexion.close();
+                        // wait for a new client
+                        //this.run();
+                        //TODO go to listening state
+
                         break;
                     default:
                         this.messageUtils.write(CODE_500 + " invalid command");
