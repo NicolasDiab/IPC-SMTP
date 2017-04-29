@@ -45,7 +45,7 @@ public class Server implements Runnable {
     private final String CMD_HELO = "HELO";
     private final String CMD_EHLO = "EHLO";
     private final String CMD_MAIL = "MAIL";
-    private final String CMD_RCPT = "RCPT TO";
+    private final String CMD_RCPT = "RCPT";
     private final String CMD_RSET = "RSET";
     private final String CMD_DATA = "DATA";
     private final String CMD_QUIT = "QUIT";
@@ -184,12 +184,12 @@ public class Server implements Runnable {
                                 }
                                 break;
                             case STATE_MAIL_RECIPIENTS:
-                                this.messageUtils.write(CODE_500 + " You must be authenticated first");
-                                new ErrorManager(CODE_500 + "", "You must be authenticated first");
+                                this.messageUtils.write(CODE_500 + " Please type the recipients");
+                                new ErrorManager(CODE_500 + "", "Please type the recipients");
                                 break;
                             case STATE_MAIL_BODY:
-                                this.messageUtils.write(CODE_500 + " You must be authenticated first");
-                                new ErrorManager(CODE_500 + "", "You must be authenticated first");
+                                this.messageUtils.write(CODE_500 + " Please type the mail body");
+                                new ErrorManager(CODE_500 + "", "Please type the mail body");
                                 break;
                         }
                         break;
@@ -244,12 +244,20 @@ public class Server implements Runnable {
                                 new ErrorManager(CODE_500 + "", "You must send recipients first");
                                 break;
                             case STATE_MAIL_RECIPIENTS:
+                                // No recipients ?
+                                if (this.forwardPaths.size() == 0) {
+                                    this.messageUtils.write(CODE_500 + " You forgot to type the recipients");
+                                    new ErrorManager(CODE_500 + "", "You forgot to type the recipients");
+                                    break;
+                                }
+
                                 // Wait for the mail body
                                 this.state = STATE_MAIL_BODY;
+
                                 this.messageUtils.write(CODE_354 + " Begin message ; end with <CRLF>.<CRLF>");
                                 // Waiting for message
                                 String typedMessage = this.messageUtils.read("\r\n.\r\n");
-                                //TODO - sauvegarder msg dans le fichier ?
+                                //TODO - sauvegarder msg dans le fichier
                                 break;
                             case STATE_MAIL_BODY:
                                 this.messageUtils.write(CODE_500 + " You have already typing a message");
