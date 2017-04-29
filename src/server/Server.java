@@ -4,8 +4,10 @@ import java.io.File;
 import java.io.IOException;
 import java.net.*;
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 import sun.rmi.runtime.Log;
@@ -72,8 +74,8 @@ public class Server implements Runnable {
      */
     private int port;
     private String state;
-    private List<String> forwardPaths;
-    private List<String> mailLines;
+    private List<User> forwardPaths;
+    private User messageFrom;
 
     /**
      * Connections
@@ -95,7 +97,6 @@ public class Server implements Runnable {
         System.out.println("Server started on " + threadName);
         this.state = STATE_LISTENING;
         forwardPaths = new ArrayList<>();
-        mailLines = new ArrayList<>();
 
         try {
             System.out.println("Waiting for client");
@@ -179,6 +180,7 @@ public class Server implements Runnable {
                                         // ALL OK - switch to recipients state
                                         messageUtils.write(CODE_250 + " OK");
                                         state = STATE_MAIL_RECIPIENTS;
+                                        this.messageFrom = this.getUserFromMailAdress(parameterArray[1]);
                                         this.forwardPaths.clear();
                                     }
                                 }
@@ -221,7 +223,7 @@ public class Server implements Runnable {
                                         break;
                                     } else {
                                         // ALL OK - add the recipient
-                                        this.forwardPaths.add(parameterArray[1]);
+                                        this.forwardPaths.add(this.getUserFromMailAdress(parameterArray[1]));
                                         messageUtils.write(CODE_250 + " OK");
                                     }
                                 }
@@ -257,7 +259,13 @@ public class Server implements Runnable {
                                 this.messageUtils.write(CODE_354 + " Begin message ; end with <CRLF>.<CRLF>");
                                 // Waiting for message
                                 String typedMessage = this.messageUtils.read("\r\n.\r\n");
-                                //TODO - sauvegarder msg dans le fichier
+
+                                // Create mail object from typed informations
+                                Mail mail = new Mail(0, this.messageFrom, this.forwardPaths, "", new Date(), typedMessage);
+
+                                // Save message in local files
+                                mail.send();
+
                                 break;
                             case STATE_MAIL_BODY:
                                 this.messageUtils.write(CODE_500 + " You have already typing a message");
@@ -317,5 +325,18 @@ public class Server implements Runnable {
         }
 
         return false;
+    }
+
+    public User getUserFromMailAdress(String userAddress) {
+        /** Get username from user address **/
+        String userAddressReplaced = userAddress.replaceAll("[<]", "");
+        userAddressReplaced = userAddressReplaced.replaceAll("[>]", "");
+
+        if (!Utils.emailValidator(userAddressReplaced))
+            return null;
+
+        String userName = userAddressReplaced.substring(0, userAddressReplaced.indexOf('@'));
+
+        return new User(userName,userAddressReplaced);
     }
 }

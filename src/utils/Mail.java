@@ -2,6 +2,7 @@ package utils;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 /**
  * @author GregoirePiat
@@ -10,7 +11,7 @@ public class Mail {
 
     private int id;
     private User from;
-    private ArrayList<User> to;
+    private List<User> to;
     private String subject;
     private Date date;
     private String body;
@@ -19,7 +20,7 @@ public class Mail {
      * Mail constructor
      *
      */
-    public Mail(int id, User from, ArrayList<User> to, String subject, Date date, String body){
+    public Mail(int id, User from, List<User> to, String subject, Date date, String body){
         this.id = id;
         this.from = from;
         this.to = to;
@@ -44,7 +45,7 @@ public class Mail {
         return from;
     }
 
-    public ArrayList<User> getTo() {
+    public List<User> getTo() {
         return to;
     }
 
@@ -66,5 +67,12 @@ public class Mail {
 
     public int getId() {
         return id;
+    }
+
+    /**
+     * Save message in local files foreach recipient
+     */
+    public void send() {
+
     }
 }
