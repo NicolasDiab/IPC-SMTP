@@ -9,18 +9,18 @@ import java.util.ArrayList;
 public class FileManager {
 
     public static final String CLIENT_STORAGE = System.getProperty("user.dir") + "/ressource/client/";
-    public static final String SERVER_STORAGE = System.getProperty("user.dir") + "/ressource/server/";
+    public static final String SERVER_STORAGE = System.getProperty("user.dir") + "/tmp/warehouse/";
 
 
     /**
      * Store mail into user file
      * @param mail Mail
      */
-    public static void storeMail(Mail mail, boolean forTheClient){
+    public static void storeMail(Mail mail){
 
         for(User u : mail.getTo()){
             // store in a different file whether it's for the client or for the server
-            String filePath = (forTheClient ? CLIENT_STORAGE : SERVER_STORAGE) + u.getName() + ".mail";
+            String filePath = SERVER_STORAGE + u.getName() + ".txt"; // path + file name + extension
             String mailString = "";
 
             File file = new File(filePath);

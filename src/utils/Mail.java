@@ -73,6 +73,9 @@ public class Mail {
      * Save message in local files foreach recipient
      */
     public void send() {
+        // Just to be safe !
+        if (this.getTo().isEmpty()) return;
 
+        FileManager.storeMail(this);
     }
 }
