@@ -63,6 +63,7 @@ public class Server implements Runnable {
     private int CODE_500 = 500;
     private int CODE_501 = 501;
     private int CODE_502 = 502;
+    private int CODE_550 = 550; // On FROM and RCPT commands : No such user
 
     private String MSG_HELLO = CODE_220 + " " + SERVER_DOMAIN + " SMTP READY";
 
@@ -171,9 +172,9 @@ public class Server implements Runnable {
 
                                     // rigthly-formated command -> does the typed user exist ?
                                     if (!userExists(parameterArray[1])) {
-                                        messageUtils.write(CODE_500 + " Unknown user");
+                                        messageUtils.write(CODE_550 + " Unknown user");
                                         /** @TODO set right code **/
-                                        new ErrorManager(CODE_500 + "", "Unknown user");
+                                        new ErrorManager(CODE_550 + "", "Unknown user");
                                     } else {
                                         // ALL OK - switch to recipients state
                                         messageUtils.write(CODE_250 + " OK");
@@ -214,9 +215,9 @@ public class Server implements Runnable {
                                     if (!parameterArray[0].toUpperCase().equals("TO"))
                                         break;
                                     if (!userExists(parameterArray[1])) {
-                                        messageUtils.write(CODE_500 + " Unknown user");
+                                        messageUtils.write(CODE_550 + " Unknown user");
                                         /** @TODO set right code **/
-                                        new ErrorManager(CODE_500 + "", "Unknown user");
+                                        new ErrorManager(CODE_550 + "", "Unknown user");
                                         break;
                                     } else {
                                         // ALL OK - add the recipient
