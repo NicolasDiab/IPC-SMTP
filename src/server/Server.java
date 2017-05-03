@@ -3,21 +3,14 @@ package server;
 import java.io.File;
 import java.io.IOException;
 import java.net.*;
-import java.sql.Timestamp;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-
-import sun.rmi.runtime.Log;
 import utils.*;
 
-import javax.net.SocketFactory;
 import javax.net.ssl.SSLServerSocket;
 import javax.net.ssl.SSLServerSocketFactory;
-import javax.net.ssl.SSLSocket;
-import javax.net.ssl.SSLSocketFactory;
 
 /**
  * @author NicolasDiab
@@ -99,10 +92,22 @@ public class Server implements Runnable {
         this.state = STATE_LISTENING;
         forwardPaths = new ArrayList<>();
 
+
+        try {
+            SSLServerSocket secureSocket = null;
+            SSLServerSocketFactory factory = (SSLServerSocketFactory) SSLServerSocketFactory.getDefault();
+            secureSocket = (SSLServerSocket) factory.createServerSocket(port);
+            secureSocket.setEnabledCipherSuites(factory.getSupportedCipherSuites());
+            myconnex = secureSocket;
+            connexion = secureSocket.accept();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
         try {
             System.out.println("Waiting for client");
-            myconnex = new ServerSocket(port, 6);
-            connexion = myconnex.accept();
+            //myconnex = new ServerSocket(port, 6);
+            //connexion = myconnex.accept();
 
             this.messageUtils = new Message(connexion);
 
@@ -125,8 +130,8 @@ public class Server implements Runnable {
                             //TODO voir les bons codes d'erreurs et les traiter de manière exhaustive
                             case STATE_AUTHORIZATION:
                                 if (parameterArray.length <= 0) {
-                                    this.messageUtils.write(CODE_500 + " Incorrect parameters (lacking server.domain)");
-                                    new ErrorManager(CODE_500 + "", "Incorrect parameters (lacking server.domain)");
+                                    this.messageUtils.write(CODE_501 + " Incorrect parameters (lacking server.domain)");
+                                    new ErrorManager(CODE_501 + "", "Incorrect parameters (lacking server.domain)");
                                 } else {
                                     if (!parameterArray[0].equals(SERVER_DOMAIN)) {
                                         this.messageUtils.write(CODE_500 + " Incorrect server.domain");

@@ -22,7 +22,6 @@ public class LogManager {
     public void storeLog(String errorName, String error){
 
         try {
-            System.out.println(this.LOG_PATH);
             PrintWriter writer = new PrintWriter(new FileOutputStream(
                     new File(this.LOG_PATH),
                     true));
