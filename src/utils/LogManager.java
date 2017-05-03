@@ -8,7 +8,7 @@ import java.util.Date;
 
 public class LogManager {
 
-    private final String LOG_PATH = System.getProperty("user.dir") + "/" + "logs.txt";
+    private final String LOG_PATH = System.getProperty("user.dir") + "\\" + "logs.txt";
 
 
     public LogManager(String errorName, String error){

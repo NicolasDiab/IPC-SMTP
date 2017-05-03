@@ -337,9 +337,6 @@ public class Server implements Runnable {
         String userAddressReplaced = userAddress.replaceAll("[<]", "");
         userAddressReplaced = userAddressReplaced.replaceAll("[>]", "");
 
-        if (!Utils.emailValidator(userAddressReplaced))
-            return null;
-
         String userName = userAddressReplaced.substring(0, userAddressReplaced.indexOf('@'));
 
         return new User(userName,userAddressReplaced);
