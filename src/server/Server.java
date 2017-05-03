@@ -99,13 +99,13 @@ public class Server implements Runnable {
             secureSocket = (SSLServerSocket) factory.createServerSocket(port);
             secureSocket.setEnabledCipherSuites(factory.getSupportedCipherSuites());
             myconnex = secureSocket;
+            System.out.println("Waiting for client");
             connexion = secureSocket.accept();
         } catch (IOException e) {
             e.printStackTrace();
         }
 
         try {
-            System.out.println("Waiting for client");
             //myconnex = new ServerSocket(port, 6);
             //connexion = myconnex.accept();
 
@@ -165,7 +165,7 @@ public class Server implements Runnable {
                                             "Incorrect parameters (lacking FROM and/or username)");
                                 } else {
                                     // Correct message size -> correct parameters ?
-                                    if (!parameterArray[0].toUpperCase().equals("FROM")) {
+                                    if (!parameterArray[0].toUpperCase().equals("FROM:")) {
                                         messageUtils.write(CODE_500 + parameterArray[0].toUpperCase() + " doesn't exist");
                                         /** @TODO set right code **/
                                         new ErrorManager(CODE_500 + "Wrong command",

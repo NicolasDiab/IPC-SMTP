@@ -8,7 +8,7 @@ package server;
 public class Connection {
 
     public static void main(String args[]) {
-        Server S1 = new Server(2223, "Thread 1");
+        Server S1 = new Server(2222, "Thread 1");
         S1.start();
 
         //Server S2 = new Server(2223, "Thread 2");
