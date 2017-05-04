@@ -111,7 +111,6 @@ public class Server implements Runnable {
 
             this.messageUtils = new Message(connexion);
 
-
             this.messageUtils.write(MSG_HELLO);
 
             this.state = STATE_AUTHORIZATION;
@@ -212,7 +211,7 @@ public class Server implements Runnable {
                                             "Incorrect parameters (lacking TO and/or username)");
                                 } else {
                                     // Correct message size -> correct parameters ?
-                                    if (!parameterArray[0].toUpperCase().equals("TO"))
+                                    if (!parameterArray[0].toUpperCase().equals("TO:"))
                                         break;
                                     if (!userExists(parameterArray[1])) {
                                         messageUtils.write(CODE_550 + " Unknown user");
@@ -253,6 +252,7 @@ public class Server implements Runnable {
                                 this.messageUtils.write(CODE_354 + " Begin message ; end with <CRLF>.<CRLF>");
                                 // Waiting for message
                                 String typedMessage = this.messageUtils.read("\r\n.\r\n");
+                                System.out.println("Typed message : " + typedMessage);
 
                                 // Create mail object from typed informations
                                 Mail mail = new Mail(0, this.messageFrom, this.forwardPaths, "", new Date(), typedMessage);
@@ -339,6 +339,6 @@ public class Server implements Runnable {
 
         String userName = userAddressReplaced.substring(0, userAddressReplaced.indexOf('@'));
 
-        return new User(userName,userAddressReplaced);
+        return new User(userName, userAddressReplaced);
     }
 }

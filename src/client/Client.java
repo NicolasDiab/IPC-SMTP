@@ -144,7 +144,7 @@ public class Client {
                 return;
             }
         }
-        messageUtils.write("DATA\r\n");
+        messageUtils.write("DATA " + mail.toString() +"\r\n.\r\n");
         answer = messageUtils.read("\r\n");
         Console.display(answer);
         if(!isSuccessful(answer)) {
