@@ -211,9 +211,11 @@ public class Server implements Runnable {
                                             "Incorrect parameters (lacking TO and/or username)");
                                 } else {
                                     // Correct message size -> correct parameters ?
-                                    if (!parameterArray[0].toUpperCase().equals("TO:"))
+                                    if (!parameterArray[0].toUpperCase().equals("TO:")) {
+                                        messageUtils.write(CODE_550 + " Unknown user");
+                                        new ErrorManager(CODE_550 + "", "Unknown user");
                                         break;
-                                    if (!userExists(parameterArray[1])) {
+                                    } if (!userExists(parameterArray[1])) {
                                         messageUtils.write(CODE_550 + " Unknown user");
                                         /** @TODO set right code **/
                                         new ErrorManager(CODE_550 + "", "Unknown user");
