@@ -133,17 +133,25 @@ public class Client {
         messageUtils.write("MAIL FROM: <"+mail.getFrom().getMailAddress()+">");
         String answer = this.messageUtils.read("\r\n");
         Console.display(answer);
-        if(!isSuccessful(answer)) {
+        if(!isSuccessful(answer))
             Console.display("Error sending the mail (MAIL FROM)");
-            return;
-        }
         for(User u : mail.getTo()) {
             messageUtils.write("RCPT TO: <" + u.getMailAddress() + ">");
             answer = this.messageUtils.read("\r\n");
             Console.display(answer);
-            if(!isSuccessful(answer))
-                Console.display("Error sending the mail (RCPT TO: <"+u.getMailAddress()+">)");
+            if(!isSuccessful(answer)) {
+                Console.display("Error sending the mail (RCPT TO <" + u.getMailAddress() + ">)");
+                return;
+            }
         }
+        messageUtils.write("DATA\r\n");
+        answer = messageUtils.read("\r\n");
+        Console.display(answer);
+        if(!isSuccessful(answer)) {
+            Console.display("Error sending the mail (DATA)");
+            return;
+        }
+        messageUtils.write(mail.toString()+"\r\n.\r\n");
     }
 
     private boolean quit(){
