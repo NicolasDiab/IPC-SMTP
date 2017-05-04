@@ -17,11 +17,7 @@ public class FileManager {
      * @param mail Mail
      */
     public static void storeMail(Mail mail){
-
-        System.out.println("Test");
-
         for(User u : mail.getTo()){
-            System.out.println("To " + u.getName());
             // store in a different file whether it's for the client or for the server
             String filePath = SERVER_STORAGE + u.getName() + ".txt"; // path + file name + extension
             String mailString = "";

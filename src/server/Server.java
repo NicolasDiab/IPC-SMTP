@@ -253,26 +253,26 @@ public class Server implements Runnable {
 
                                 this.messageUtils.write(CODE_354 + " Begin message ; end with <CRLF>.<CRLF>");
 
-                                if (!messageReceived.toLowerCase().contains("DATA")){
+                                if (!messageReceived.toLowerCase().contains("DATA")) {
                                     // Waiting for message
                                     String typedMessage = this.messageUtils.read("\r\n.\r\n");
                                     System.out.println("Typed message : " + typedMessage);
+
+
+                                    // Create mail object from typed informations
+                                    Mail mail = new Mail(0, this.messageFrom, this.forwardPaths, "", new Date(), typedMessage);
+
+                                    // Send mail
+                                    mail.send();
+
+                                    this.messageUtils.write(CODE_250 + " OK");
+
+                                    // Go back to authenticated State
+                                    this.state = STATE_AUTHENTICATED;
+                                    // clear variables
+                                    this.forwardPaths.clear();
+                                    this.messageFrom = null;
                                 }
-
-                                // Create mail object from typed informations
-                                Mail mail = new Mail(0, this.messageFrom, this.forwardPaths, "", new Date(), messageReceived);
-
-                                // Send mail
-                                mail.send();
-
-                                this.messageUtils.write(CODE_250 + " OK");
-
-                                // Go back to authenticated State
-                                this.state = STATE_AUTHENTICATED;
-                                // clear variables
-                                this.forwardPaths.clear();
-                                this.messageFrom = null;
-
                                 break;
                         }
                         break;

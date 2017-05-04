@@ -153,7 +153,7 @@ public class Client {
             Console.display("Error sending the mail (DATA)");
             return;
         }
-        messageUtils.write(mail.toString());
+        messageUtils.write(mail.getBody() + "\r\n.\r\n");
     }
 
     private boolean quit(){
