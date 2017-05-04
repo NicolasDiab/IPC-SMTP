@@ -133,8 +133,10 @@ public class Client {
         messageUtils.write("MAIL FROM: <"+mail.getFrom().getMailAddress()+">");
         String answer = this.messageUtils.read("\r\n");
         Console.display(answer);
-        if(!isSuccessful(answer))
+        if(!isSuccessful(answer)) {
             Console.display("Error sending the mail (MAIL FROM)");
+            return;
+        }
         for(User u : mail.getTo()) {
             messageUtils.write("RCPT TO: <" + u.getMailAddress() + ">");
             answer = this.messageUtils.read("\r\n");
@@ -144,14 +146,14 @@ public class Client {
                 return;
             }
         }
-        messageUtils.write("DATA " + mail.toString() +"\r\n.\r\n");
+        messageUtils.write("DATA");
         answer = messageUtils.read("\r\n");
         Console.display(answer);
         if(!isSuccessful(answer)) {
             Console.display("Error sending the mail (DATA)");
             return;
         }
-        messageUtils.write(mail.toString()+"\r\n.\r\n");
+        messageUtils.write(mail.toString());
     }
 
     private boolean quit(){
@@ -166,7 +168,7 @@ public class Client {
     private boolean isSuccessful(String message){
         if(message=="") return false;
         String sub = message.substring(0,3);
-        return sub.equals("250")||sub.equals("220")||sub.equals("221")||sub.equals("252")||sub.equals("251");
+        return sub.equals("250")||sub.equals("220")||sub.equals("221")||sub.equals("252")||sub.equals("251")||sub.equals("354");
     }
 
 }
