@@ -252,12 +252,15 @@ public class Server implements Runnable {
                                 this.state = STATE_MAIL_BODY;
 
                                 this.messageUtils.write(CODE_354 + " Begin message ; end with <CRLF>.<CRLF>");
-                                // Waiting for message
-                                String typedMessage = this.messageUtils.read("\r\n.\r\n");
-                                System.out.println("Typed message : " + typedMessage);
+
+                                if (!messageReceived.toLowerCase().contains("DATA")){
+                                    // Waiting for message
+                                    String typedMessage = this.messageUtils.read("\r\n.\r\n");
+                                    System.out.println("Typed message : " + typedMessage);
+                                }
 
                                 // Create mail object from typed informations
-                                Mail mail = new Mail(0, this.messageFrom, this.forwardPaths, "", new Date(), typedMessage);
+                                Mail mail = new Mail(0, this.messageFrom, this.forwardPaths, "", new Date(), messageReceived);
 
                                 // Send mail
                                 mail.send();
