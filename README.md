@@ -1,6 +1,6 @@
 # IPC-SMTP Client-Serveur
 
-### Louis BRAZIER
-### Nicolas DIAB
-### Thibault DUBOIS
-### Grégoire PIAT
+### Louis BRAZIER -- Client
+### Nicolas DIAB -- Serveur
+### Thibault DUBOIS -- Client
+### Grégoire PIAT -- Serveur
