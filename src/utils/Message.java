@@ -80,6 +80,11 @@ public class Message {
         }
         catch (Exception e) {
             System.err.println(e);
+            try {
+                this.socket.close();
+            } catch (Exception e1) {
+                e1.printStackTrace();
+            }
         }
     }
 }

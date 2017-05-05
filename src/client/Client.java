@@ -130,7 +130,7 @@ public class Client {
     }
 
     private void sendMail(Mail mail){
-        messageUtils.write("MAIL FROM: <"+mail.getFrom().getMailAddress()+">");
+        messageUtils.write("MAIL FROM: <"+mail.getFrom().getMailAddress().trim()+">");
         String answer = this.messageUtils.read("\r\n");
         Console.display(answer);
         if(!isSuccessful(answer)) {
@@ -138,11 +138,11 @@ public class Client {
             return;
         }
         for(User u : mail.getTo()) {
-            messageUtils.write("RCPT TO: <" + u.getMailAddress() + ">");
+            messageUtils.write("RCPT TO: <" + u.getMailAddress().trim() + ">");
             answer = this.messageUtils.read("\r\n");
             Console.display(answer);
             if(!isSuccessful(answer)) {
-                Console.display("Error sending the mail (RCPT TO <" + u.getMailAddress() + ">)");
+                Console.display("Error sending the mail (RCPT TO <" + u.getMailAddress().trim() + ">)");
                 return;
             }
         }

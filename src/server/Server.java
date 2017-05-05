@@ -74,7 +74,7 @@ public class Server implements Runnable {
      * Connections
      */
     private Socket connexion;
-    private ServerSocket myconnex;
+    private SSLServerSocket myconnex;
 
     // couche qui simplifie la gestion des échanges de message avec le client
     private Message messageUtils;
@@ -93,13 +93,11 @@ public class Server implements Runnable {
 
 
         try {
-            SSLServerSocket secureSocket = null;
             SSLServerSocketFactory factory = (SSLServerSocketFactory) SSLServerSocketFactory.getDefault();
-            secureSocket = (SSLServerSocket) factory.createServerSocket(port);
-            secureSocket.setEnabledCipherSuites(factory.getSupportedCipherSuites());
-            myconnex = secureSocket;
+            myconnex = (SSLServerSocket) factory.createServerSocket(port);
+            myconnex.setEnabledCipherSuites(factory.getSupportedCipherSuites());
             System.out.println("Waiting for client");
-            connexion = secureSocket.accept();
+            connexion = myconnex.accept();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -290,8 +288,7 @@ public class Server implements Runnable {
                         this.messageUtils.write(CODE_221 + " SMTP server signing off");
                         // close the TCP connection
                         this.connexion.close();
-                        // wait for a new client
-                        //this.run();
+                        this.myconnex.close();
                         //TODO go to listening state
                         break;
                     default:
@@ -300,10 +297,18 @@ public class Server implements Runnable {
                         break;
                 }
             }
-        } catch (IOException ex) {
+        } catch (Exception ex) {
             System.out.println("Une exception inatendue est survenue !!!!!!!!!!!!!!!");
             ex.printStackTrace();
         }
+        try {
+            this.connexion.close();
+            this.myconnex.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        // wait for a new client
+        this.run();
     }
 
     public void start() {
