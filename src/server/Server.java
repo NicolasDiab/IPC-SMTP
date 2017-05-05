@@ -18,7 +18,6 @@ import javax.net.ssl.SSLServerSocketFactory;
  */
 public class Server implements Runnable {
 
-
     private Thread thread;
     private String threadName = "ThreadInstance";
 
