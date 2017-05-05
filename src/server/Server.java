@@ -74,7 +74,7 @@ public class Server implements Runnable {
      * Connections
      */
     private Socket connexion;
-    private SSLServerSocket myconnex;
+    private ServerSocket myconnex;
 
     // couche qui simplifie la gestion des échanges de message avec le client
     private Message messageUtils;
@@ -93,11 +93,13 @@ public class Server implements Runnable {
 
 
         try {
+            SSLServerSocket secureSocket = null;
             SSLServerSocketFactory factory = (SSLServerSocketFactory) SSLServerSocketFactory.getDefault();
-            myconnex = (SSLServerSocket) factory.createServerSocket(port);
-            myconnex.setEnabledCipherSuites(factory.getSupportedCipherSuites());
+            secureSocket = (SSLServerSocket) factory.createServerSocket(port);
+            secureSocket.setEnabledCipherSuites(factory.getSupportedCipherSuites());
+            myconnex = secureSocket;
             System.out.println("Waiting for client");
-            connexion = myconnex.accept();
+            connexion = secureSocket.accept();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -169,11 +171,28 @@ public class Server implements Runnable {
                                         break;
                                     }
 
+
+                                    String[] parametersArrayDomain = parameterArray[1].split("@");
+                                    if (parametersArrayDomain.length > 0){
+                                        String domain = parametersArrayDomain[1];
+                                        domain = domain.replaceAll("[<]", "");
+                                        domain = domain.replaceAll("[>]", "");
+                                        System.out.println(domain);
+
+                                        if (!domain.equals(SERVER_DOMAIN)){
+                                            this.messageUtils.write(CODE_500 + " WRONG DOMAIN ");
+                                            break;
+                                        }
+
+                                    }
+
+
+
                                     // rigthly-formated command -> does the typed user exist ?
                                     if (!userExists(parameterArray[1])) {
-                                        messageUtils.write(CODE_550 + " Unknown user " + parameterArray[1]);
+                                        messageUtils.write(CODE_550 + " Unknown user");
                                         /** @TODO set right code **/
-                                        new ErrorManager(CODE_550 + "", "Unknown user" + parameterArray[1]);
+                                        new ErrorManager(CODE_550 + "", "Unknown user");
                                     } else {
                                         // ALL OK - switch to recipients state
                                         messageUtils.write(CODE_250 + " OK");
@@ -209,13 +228,13 @@ public class Server implements Runnable {
                                 } else {
                                     // Correct message size -> correct parameters ?
                                     if (!parameterArray[0].toUpperCase().equals("TO:")) {
-                                        messageUtils.write(CODE_500 + " Incorrect parameters (lacking TO and/or username)");
-                                        new ErrorManager(CODE_500 + "", "Incorrect parameters (lacking TO and/or username)");
+                                        messageUtils.write(CODE_550 + " Unknown user");
+                                        new ErrorManager(CODE_550 + "", "Unknown user");
                                         break;
                                     } if (!userExists(parameterArray[1])) {
-                                        messageUtils.write(CODE_550 + " Unknown user " + parameterArray[1]);
+                                        messageUtils.write(CODE_550 + " Unknown user");
                                         /** @TODO set right code **/
-                                        new ErrorManager(CODE_550 + "", "Unknown user " + parameterArray[1]);
+                                        new ErrorManager(CODE_550 + "", "Unknown user");
                                         break;
                                     } else {
                                         // ALL OK - add the recipient
@@ -288,7 +307,8 @@ public class Server implements Runnable {
                         this.messageUtils.write(CODE_221 + " SMTP server signing off");
                         // close the TCP connection
                         this.connexion.close();
-                        this.myconnex.close();
+                        // wait for a new client
+                        //this.run();
                         //TODO go to listening state
                         break;
                     default:
@@ -297,18 +317,10 @@ public class Server implements Runnable {
                         break;
                 }
             }
-        } catch (Exception ex) {
+        } catch (IOException ex) {
             System.out.println("Une exception inatendue est survenue !!!!!!!!!!!!!!!");
             ex.printStackTrace();
         }
-        try {
-            this.connexion.close();
-            this.myconnex.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        // wait for a new client
-        this.run();
     }
 
     public void start() {

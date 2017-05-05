@@ -12,8 +12,8 @@ import java.io.IOException;
 public class Main {
     public static void main(String [ ] args)
     {
-        LogManager logManager = new LogManager("Test Name", "Test error content");
-        Server server = new Server(2222,"1");
-        server.run();
+        Server S1 = new Server(2222, "Thread 1");
+        Thread thread1 = new Thread(S1);
+        thread1.start();
     }
 }
