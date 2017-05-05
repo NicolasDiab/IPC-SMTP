@@ -143,7 +143,7 @@ public class Client {
             Console.display(answer);
             if(!isSuccessful(answer)) {
                 Console.display("Error sending the mail (RCPT TO <" + u.getMailAddress().trim() + ">)");
-                return;
+                //return;
             }
         }
         messageUtils.write("DATA");
