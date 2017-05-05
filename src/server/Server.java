@@ -171,9 +171,9 @@ public class Server implements Runnable {
 
                                     // rigthly-formated command -> does the typed user exist ?
                                     if (!userExists(parameterArray[1])) {
-                                        messageUtils.write(CODE_550 + " Unknown user");
+                                        messageUtils.write(CODE_550 + " Unknown user " + parameterArray[1]);
                                         /** @TODO set right code **/
-                                        new ErrorManager(CODE_550 + "", "Unknown user");
+                                        new ErrorManager(CODE_550 + "", "Unknown user" + parameterArray[1]);
                                     } else {
                                         // ALL OK - switch to recipients state
                                         messageUtils.write(CODE_250 + " OK");
@@ -209,13 +209,13 @@ public class Server implements Runnable {
                                 } else {
                                     // Correct message size -> correct parameters ?
                                     if (!parameterArray[0].toUpperCase().equals("TO:")) {
-                                        messageUtils.write(CODE_550 + " Unknown user");
-                                        new ErrorManager(CODE_550 + "", "Unknown user");
+                                        messageUtils.write(CODE_500 + " Incorrect parameters (lacking TO and/or username)");
+                                        new ErrorManager(CODE_500 + "", "Incorrect parameters (lacking TO and/or username)");
                                         break;
                                     } if (!userExists(parameterArray[1])) {
-                                        messageUtils.write(CODE_550 + " Unknown user");
+                                        messageUtils.write(CODE_550 + " Unknown user " + parameterArray[1]);
                                         /** @TODO set right code **/
-                                        new ErrorManager(CODE_550 + "", "Unknown user");
+                                        new ErrorManager(CODE_550 + "", "Unknown user " + parameterArray[1]);
                                         break;
                                     } else {
                                         // ALL OK - add the recipient
