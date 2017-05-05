@@ -1,0 +1,14 @@
+Date: Fri May 05 11:29:46 CEST 2017
+From: yolo <yolo@univ-lyon1.fr>
+Subject: 
+To: louis <louis@univ-lyon1.fr>, gregoire <gregoire@univ-lyon1.fr>, 
+Ceci est une démonstration
+.
+Date: Fri May 05 11:34:25 CEST 2017
+From: yolo <yolo@univ-lyon1.fr>
+Subject: 
+To: louis <louis@univ-lyon1.fr>, 
+MAIL FROM: <yolo@univ-lyon1.fr>
+RCPT TO: <greg@univ-lyon1.fr>
+
+.

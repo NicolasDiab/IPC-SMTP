@@ -172,34 +172,12 @@ public class Server implements Runnable {
                                     }
 
 
-                                    String[] parametersArrayDomain = parameterArray[1].split("@");
-                                    if (parametersArrayDomain.length > 0){
-                                        String domain = parametersArrayDomain[1];
-                                        domain = domain.replaceAll("[<]", "");
-                                        domain = domain.replaceAll("[>]", "");
-                                        System.out.println(domain);
+                                // ALL OK - switch to recipients state
+                                messageUtils.write(CODE_250 + " OK");
+                                state = STATE_MAIL_RECIPIENTS;
+                                this.messageFrom = this.getUserFromMailAdress(parameterArray[1]);
+                                this.forwardPaths.clear();
 
-                                        if (!domain.equals(SERVER_DOMAIN)){
-                                            this.messageUtils.write(CODE_500 + " WRONG DOMAIN ");
-                                            break;
-                                        }
-
-                                    }
-
-
-
-                                    // rigthly-formated command -> does the typed user exist ?
-                                    if (!userExists(parameterArray[1])) {
-                                        messageUtils.write(CODE_550 + " Unknown user");
-                                        /** @TODO set right code **/
-                                        new ErrorManager(CODE_550 + "", "Unknown user");
-                                    } else {
-                                        // ALL OK - switch to recipients state
-                                        messageUtils.write(CODE_250 + " OK");
-                                        state = STATE_MAIL_RECIPIENTS;
-                                        this.messageFrom = this.getUserFromMailAdress(parameterArray[1]);
-                                        this.forwardPaths.clear();
-                                    }
                                 }
                                 break;
                             case STATE_MAIL_RECIPIENTS:
@@ -237,9 +215,24 @@ public class Server implements Runnable {
                                         new ErrorManager(CODE_550 + "", "Unknown user");
                                         break;
                                     } else {
-                                        // ALL OK - add the recipient
-                                        this.forwardPaths.add(this.getUserFromMailAdress(parameterArray[1]));
-                                        messageUtils.write(CODE_250 + " OK");
+
+                                        // Wrong rcpt domain
+                                        String[] parametersArrayDomain = parameterArray[1].split("@");
+                                        if (parametersArrayDomain.length > 0){
+                                            String domain = parametersArrayDomain[1];
+                                            domain = domain.replaceAll("[<]", "");
+                                            domain = domain.replaceAll("[>]", "");
+                                            System.out.println(domain);
+
+                                            if (!domain.equals(SERVER_DOMAIN)){
+                                                this.messageUtils.write(CODE_500 + " WRONG DOMAIN ");
+                                            }
+                                            else {
+                                                // ALL OK - add the recipient
+                                                this.forwardPaths.add(this.getUserFromMailAdress(parameterArray[1]));
+                                                messageUtils.write(CODE_250 + " OK");
+                                            }
+                                        }
                                     }
                                 }
                                 break;
