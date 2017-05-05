@@ -294,7 +294,6 @@ public class Server implements Runnable {
                         // wait for a new client
                         //this.run();
                         //TODO go to listening state
-
                         break;
                     default:
                         this.messageUtils.write(CODE_500 + " invalid command");

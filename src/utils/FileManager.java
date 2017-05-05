@@ -22,8 +22,8 @@ public class FileManager {
             String filePath = SERVER_STORAGE + u.getName() + ".txt"; // path + file name + extension
             String mailString = "";
 
-            File file = new File(filePath);
-            file.getParentFile().mkdirs();
+            //File file = new File(filePath);
+            //file.getParentFile().mkdirs();
 
             mailString = mail.toString();
 
