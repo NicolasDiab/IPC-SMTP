@@ -254,7 +254,7 @@ public class Server implements Runnable {
 
                                 if (!messageReceived.toLowerCase().contains("DATA")) {
                                     // Waiting for message
-                                    String typedMessage = this.messageUtils.read("\r\n.\r\n");
+                                    String typedMessage = this.messageUtils.read("\r\n.\r\n").split("\r\n.\r\n")[0];
                                     System.out.println("Typed message : " + typedMessage);
 
 
